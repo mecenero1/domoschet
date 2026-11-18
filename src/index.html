@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Домосчёт</title>
+<meta name="description" content="Калькуляторы ипотеки, материалов для ремонта и коммунальных платежей. Впишите свои цифры, и итог пересчитается сразу.">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Домосчёт — ипотека, ремонт и коммуналка">
+<meta property="og:description" content="Платёж по кредиту, материалы на комнату и квитанция за месяц по вашим цифрам.">
+<meta property="og:image" content="https://mecenero1.github.io/domoschet/assets/og.jpg">
+<meta property="og:url" content="https://mecenero1.github.io/domoschet/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231c2420'/%3E%3Cpath d='M18 30 32 18l14 12M22 28v17h8v-9h4v9h8V28' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght@600;700&family=Onest:wght@400;500;600&display=swap">
+<style>
+:root{
+  /* Белая страница, под ней размытая комната с мебелью. Белые карточки, тёмный блок итога, 3D-рендеры как главный визуал. */
+  --bg:#ffffff;
+  --surface:#ffffff;
+  --surface-2:#f5f4f1;
+  --ink:#1c2420;
+  --muted:#6a716c;
+  --line:#e8e5df;
+  --accent:#2e6a4f;
+  --accent-soft:#e5eee8;
+  --warm:#d9875a;
+  --c1:#2e6a4f;
+  --c2:#eea16f;
+  --c3:#9cc0aa;
+  --hero:#1f2b25;
+  --hero-ink:#f3f1ec;
+  --hero-warm:#f4b38a;
+  --hero-good:#9fe0b9;
+  --warn:#b8502a;
+  --good:#2b7a4e;
+  --plan-floor:#efe6d8;
+  --font-display:"Geologica","Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-body:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --r-card:24px; --r-ctl:14px;
+  color-scheme:light;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#fff;color:var(--ink);font:400 16px/1.5 var(--font-body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1160px;margin:0 auto;padding:0 16px 40px}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+button:disabled{opacity:.45;cursor:not-allowed}
+h1,h2,h3{text-wrap:balance;margin:0}
+p{margin:0}
+[hidden]{display:none !important}
+.ico{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* размытая комната на фоне */
+.backdrop{position:fixed;inset:0;z-index:-1;pointer-events:none;transform:translateZ(0);
+  background:linear-gradient(180deg,rgba(255,255,255,.30) 0%,rgba(255,255,255,.62) 45%,rgba(255,255,255,.80) 100%),url(../assets/img/room-blur.webp) center 30%/cover no-repeat}
+.card,details.sched{box-shadow:0 1px 2px rgba(28,36,32,.04),0 8px 24px rgba(28,36,32,.05)}
+
+/* шапка */
+html{scroll-behavior:smooth}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0 4px}
+.brand{display:flex;align-items:center;gap:10px;font:700 19px/1 var(--font-display);letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+.logo{width:36px;height:36px;border-radius:11px;background:var(--ink);color:#fff;display:grid;place-items:center;box-shadow:inset 0 -2px 0 rgba(255,255,255,.08)}
+.logo .ico{width:19px;height:19px;stroke-width:2}
+.top-links{display:none;gap:4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid var(--line)}
+.top-links a{padding:8px 14px;border-radius:999px;color:var(--muted);text-decoration:none;font-size:14.5px;font-weight:500;transition:color .2s,background .2s}
+.top-links a:hover{color:var(--ink);background:var(--surface-2)}
+@media (min-width:860px){.top-links{display:flex}}
+.author{display:inline-flex;align-items:center;gap:8px;padding:8px 14px 8px 11px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:14px;white-space:nowrap;transition:border-color .2s,box-shadow .2s;box-shadow:0 2px 10px rgba(28,36,32,.05)}
+.author:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(28,36,32,.09)}
+.author .ico{width:17px;height:17px;color:var(--accent)}
+.author b{font-weight:600}
+@media (max-width:420px){.author .a-pre{display:none}}
+
+/* первый экран */
+.hero{display:grid;gap:8px;align-items:center;padding:22px 0 6px}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;border-radius:999px;background:rgba(255,255,255,.8);border:1px solid var(--line);font-size:13px;font-weight:500;color:var(--ink)}
+.live{width:8px;height:8px;border-radius:50%;background:#3fae74;box-shadow:0 0 0 3px rgba(63,174,116,.18)}
+h1{font:700 clamp(34px,8.8vw,64px)/1.0 var(--font-display);letter-spacing:-.04em;margin:16px 0 16px;max-width:12.5ch}
+.lead{font-size:17.5px;line-height:1.55;color:var(--muted);max-width:42ch}
+.hero-cta{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:26px}
+.btn-dark,.btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:14px;padding:14px 20px;font-weight:600;font-size:15.5px;text-decoration:none;transition:transform .15s,box-shadow .2s,background .2s;min-height:50px}
+.btn-dark{background:var(--ink);color:#fff;box-shadow:0 6px 18px rgba(28,36,32,.18)}
+.btn-dark:hover{box-shadow:0 10px 26px rgba(28,36,32,.24)}
+.btn-ghost{background:rgba(255,255,255,.85);color:var(--ink);border:1px solid var(--line)}
+.btn-ghost:hover{background:#fff}
+.btn-dark:active,.btn-ghost:active{transform:scale(.97)}
+.btn-dark .ico{width:18px;height:18px}
+.stats{display:flex;gap:0;margin-top:30px;padding-top:20px;border-top:1px solid var(--line);max-width:460px}
+.stats div{flex:1;padding-right:14px;min-width:0}
+.stats div + div{padding-left:16px;border-left:1px solid var(--line)}
+.stats b{display:block;font:700 26px/1.1 var(--font-display);letter-spacing:-.03em}
+.stats span{display:block;font-size:13px;color:var(--muted);margin-top:4px;line-height:1.3}
+.hero-media{position:relative;margin:10px -10px 0}
+.hero-media img{display:block;width:100%;height:auto;
+  -webkit-mask-image:linear-gradient(to right,#000 88%,transparent),linear-gradient(to bottom,#000 90%,transparent);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(to right,#000 88%,transparent),linear-gradient(to bottom,#000 90%,transparent);mask-composite:intersect}
+.peek{position:absolute;display:grid;gap:2px;text-align:left;border:1px solid var(--line);background:rgba(255,255,255,.96);color:var(--ink);border-radius:16px;padding:10px 14px 11px;box-shadow:0 12px 32px rgba(20,25,22,.12);transition:transform .2s}
+.peek:hover{transform:translateY(-2px)}
+.peek span{font-size:12px;color:var(--muted)}
+.peek b{font:700 17px/1.2 var(--font-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.peek-a{left:4%;top:5%;background:var(--hero);border-color:transparent;color:var(--hero-ink)}
+.peek-a span{color:var(--hero-ink);opacity:.7}
+.peek-b{right:3%;bottom:9%}
+@media (min-width:760px){
+  .hero{grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:24px;padding:46px 0 18px}
+  .hero-media{margin:0 -12px 0 0}
+  .peek{padding:13px 17px 14px}
+  .peek b{font-size:21px}
+}
+@media (max-width:520px){.hero-cta a{flex:1 1 100%}.stats span{font-size:12.5px}}
+@media (max-width:420px){.peek b{font-size:15px}.peek{padding:8px 11px 9px;border-radius:13px}.stats b{font-size:22px}}
+
+/* вкладки */
+.tabs-wrap{position:sticky;top:0;z-index:30;padding:10px 0 12px}
+.tabs{position:relative;display:grid;grid-template-columns:repeat(3,1fr);padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 20px rgba(28,36,32,.06)}
+.tab-ind{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);border-radius:14px;background:var(--ink);transform:translateX(calc(var(--i,0) * 100%));transition:transform .4s cubic-bezier(.3,.8,.2,1)}
+.tabs a{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 6px;border-radius:14px;color:var(--muted);text-decoration:none;font:600 15px/1.2 var(--font-body);transition:color .25s;min-width:0}
+.tabs a span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tabs a[aria-selected="true"]{color:#fff}
+.tabs a:focus-visible{outline-offset:-3px}
+
+/* лист */
+.sheet{padding-top:12px}
+.sheet.enter{animation:enter .42s cubic-bezier(.2,.7,.2,1)}
+@keyframes enter{from{opacity:0;transform:translateY(14px)}}
+.phead{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;margin-bottom:16px;padding:20px 8px 20px 20px;background:linear-gradient(135deg,#ffffff 0%,#f6f4ef 100%);border:1px solid var(--line);border-radius:26px;overflow:hidden;box-shadow:0 1px 2px rgba(28,36,32,.04),0 8px 24px rgba(28,36,32,.05)}
+.phead h2{font:700 clamp(26px,6.4vw,40px)/1.05 var(--font-display);letter-spacing:-.035em}
+.phead p{color:var(--muted);margin-top:8px;max-width:46ch;font-size:15.5px}
+.feat{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.feat span{font-size:12.5px;font-weight:500;color:var(--ink);background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:999px;padding:5px 10px}
+.phead-img{width:clamp(120px,34vw,320px);height:auto;margin:-18px -10px -26px 0}
+@media (max-width:520px){.feat{display:none}.phead{padding:16px 4px 16px 16px}}
+@media (min-width:760px){.phead{padding:28px 18px 28px 32px}}
+.layout{display:grid;gap:16px}
+@media (min-width:900px){.layout{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:start}}
+.col{display:grid;gap:16px;align-content:start;min-width:0}
+.out{scroll-margin-top:84px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:18px;display:grid;gap:16px;min-width:0}
+.inp:hover{border-color:#d6d2ca}
+@media (min-width:560px){.card{padding:22px}}
+.step{display:flex;align-items:center;gap:11px}
+.step-n{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font:700 13px/1 var(--font-display);display:grid;place-items:center;flex:none}
+.step h3{font:600 18px/1.2 var(--font-display);letter-spacing:-.015em}
+.step h3{flex:1;min-width:0}
+.step .opt{margin-left:auto;white-space:nowrap;font-size:12.5px;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+.card-title{font:600 16px/1.2 var(--font-display);letter-spacing:-.01em}
+.card-in{display:grid;gap:14px}
+
+/* поля */
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px;align-items:end}
+.fields.three{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 10px}
+.full{grid-column:1/-1}
+.field{display:grid;gap:7px;min-width:0;align-content:start}
+.field > label,.lbl{font-size:13.5px;font-weight:500;color:var(--muted);line-height:1.25}
+.lrow{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.badge{font:600 12.5px/1 var(--font-body);color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:5px 9px}
+.inp{position:relative;display:flex;align-items:center;background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--r-ctl);min-height:50px;transition:border-color .15s,box-shadow .15s}
+.inp:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.inp input,.inp select{flex:1;min-width:0;width:100%;border:0;background:transparent;color:var(--ink);font:600 17px/1.2 var(--font-body);padding:12px 8px 12px 14px;font-variant-numeric:tabular-nums;outline:none;border-radius:var(--r-ctl)}
+.inp select{font-weight:500;font-size:16px;appearance:none;-webkit-appearance:none;padding-right:36px;cursor:pointer}
+.inp select option{background:var(--surface);color:var(--ink)}
+.inp.sel::after{content:"";position:absolute;right:15px;top:50%;width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.unit{padding:0 14px 0 4px;color:var(--muted);font-size:14.5px;white-space:nowrap}
+.three .inp{min-height:46px}
+.three .inp input{font-size:16px;padding:10px 6px 10px 11px}
+.hint{font-size:13px;line-height:1.45;color:var(--muted);max-width:60ch}
+.hint.warn{color:var(--warn)}
+
+.range{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0;cursor:pointer;--p:50%}
+.range:focus-visible{outline:none}
+.range::-webkit-slider-runnable-track{height:6px;border-radius:6px;background:linear-gradient(var(--accent),var(--accent)) 0/var(--p) 100% no-repeat,var(--line)}
+.range::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--surface);border:2.5px solid var(--accent);margin-top:-9px;box-shadow:0 1px 4px rgba(0,0,0,.18);transition:transform .15s}
+.range:active::-webkit-slider-thumb{transform:scale(1.12)}
+.range:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px var(--accent-soft)}
+.range::-moz-range-track{height:6px;border-radius:6px;background:var(--line)}
+.range::-moz-range-progress{height:6px;border-radius:6px;background:var(--accent)}
+.range::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--surface);border:2.5px solid var(--accent)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:baseline;gap:7px;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 14px;font-size:14.5px;font-weight:500;transition:background .2s,color .2s,border-color .2s}
+.chip b{font-weight:600;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-ctl)}
+.seg button{border:0;background:transparent;border-radius:10px;padding:10px 6px;font-size:14px;font-weight:500;color:var(--muted);transition:background .2s,color .2s;min-height:42px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+.check{display:flex;gap:11px;align-items:flex-start;font-size:15px;cursor:pointer}
+.check input{width:20px;height:20px;accent-color:var(--accent);margin:1px 0 0;flex:none}
+
+/* итог */
+.result{position:relative;overflow:hidden;background:var(--hero);color:var(--hero-ink);border-radius:26px;padding:22px 20px 20px;display:grid;gap:4px;isolation:isolate}
+@media (min-width:560px){.result{padding:26px 26px 24px}}
+.r-label{font-size:14px;font-weight:500;opacity:.78}
+.r-big{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 8px;font:700 clamp(40px,11vw,58px)/1.02 var(--font-display);letter-spacing:-.04em;margin:6px 0 10px;font-variant-numeric:tabular-nums}
+.r-big small{font-size:.42em;font-weight:600;letter-spacing:-.01em;opacity:.85}
+.r-say{font-size:15.5px;line-height:1.5;opacity:.92;max-width:48ch}
+.r-say b{color:var(--hero-warm);font-weight:600}
+.r-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:16px}
+.r-tile{background:rgba(255,255,255,.07);border-radius:16px;padding:11px 13px;min-width:0}
+.r-tile span{display:block;font-size:12.5px;opacity:.72;line-height:1.3}
+.r-tile b{display:block;font:600 17px/1.3 var(--font-display);letter-spacing:-.01em;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.r-tile.warm b{color:var(--hero-warm)}
+.r-tile.good b{color:var(--hero-good)}
+.r-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.btn-warm{display:inline-flex;align-items:center;gap:8px;border:0;background:var(--hero-warm);color:#2a1609;border-radius:14px;padding:12px 16px;font-weight:600;font-size:15px;min-height:48px;transition:transform .15s}
+.btn-warm:active:not(:disabled){transform:scale(.97)}
+.r-status{font-size:13.5px;color:var(--hero-good)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:11px 16px;font-weight:600;font-size:15px;min-height:46px;transition:border-color .2s,transform .15s}
+.btn:hover{border-color:var(--accent)}
+.btn:active{transform:scale(.97)}
+.btns{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.status{font-size:13.5px;color:var(--good)}
+.status.bad{color:var(--warn)}
+
+.list{display:grid}
+.li{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:0;padding-bottom:0}
+.li:first-child{padding-top:0}
+.li .l{color:var(--muted);font-size:14.5px;min-width:0}
+.li .l small{display:block;font-size:12.5px;opacity:.85;margin-top:1px}
+.li .v{font-weight:600;font-size:15px;white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
+.li.warn .v{color:var(--warn)}
+.li.good .v{color:var(--good)}
+.li.strong .l{color:var(--ink);font-weight:600}
+.li.strong .v{font:700 17px var(--font-display)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--g);margin-right:8px;vertical-align:0}
+
+.bar{display:flex;gap:3px;height:12px}
+.bar i{display:block;height:100%;border-radius:999px;background:var(--g);transition:flex-grow .45s cubic-bezier(.3,.8,.2,1);flex-basis:0;min-width:6px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center}
+.legend b{color:var(--ink);font-weight:600;margin-left:6px;font-variant-numeric:tabular-nums}
+
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .gl{stroke:var(--line);stroke-width:1}
+.chart .axis{stroke:var(--muted);stroke-width:1;opacity:.6}
+.chart .ax{fill:var(--muted);font:500 11.5px var(--font-body)}
+.chart .area{fill:var(--accent);fill-opacity:.13}
+.chart .ln{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.chart .ln2{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 5}
+.chart .pt{fill:var(--accent)}
+.chart .pt2{fill:var(--surface);stroke:var(--accent);stroke-width:2.5}
+.chart .endt{fill:var(--accent);font:600 12px var(--font-body)}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 14px}
+.chart-leg{font-size:13px;color:var(--muted);display:flex;gap:14px}
+.chart-leg i{display:inline-block;width:16px;height:0;border-top:2.5px solid var(--accent);vertical-align:4px;margin-right:6px}
+.chart-leg i.d{border-top:1.5px dashed var(--muted)}
+
+details.sched{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
+details.sched summary{padding:17px 20px;font:600 16px/1.2 var(--font-display);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+details.sched summary::-webkit-details-marker{display:none}
+details.sched summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-3px);transition:transform .25s}
+details.sched[open] summary::after{transform:rotate(-135deg) translateY(-3px)}
+.tbl{overflow:auto;max-height:420px;border-top:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;font-weight:500;color:var(--muted);position:sticky;top:0;background:var(--surface)}
+th:first-child,td:first-child{text-align:left}
+
+/* материалы */
+.mpick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.mpick button{display:grid;justify-items:center;align-content:start;gap:4px;padding:8px 4px 10px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:500;line-height:1.2;text-align:center;color:var(--ink);transition:border-color .2s,background .2s,transform .15s}
+.mpick button img{width:56px;height:56px;display:block;margin:-4px 0 -2px;transition:transform .25s cubic-bezier(.3,.8,.2,1)}
+.mpick button[aria-pressed="true"] img{transform:scale(1.08)}
+.mpick button:active{transform:scale(.96)}
+.mpick button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.plan{background:var(--surface-2);border-radius:18px;border:1px solid var(--line)}
+.plan svg{display:block;width:100%;height:auto;max-height:250px}
+.plan .floor{fill:var(--plan-floor)}
+.plan .plank{stroke:var(--surface);stroke-width:1;opacity:.55}
+.plan .wall{fill:none;stroke:var(--ink);stroke-width:4.5;stroke-linejoin:round}
+.plan .gap{stroke:var(--surface-2);stroke-width:7}
+.plan .win{stroke:var(--accent);stroke-width:2;stroke-linecap:round}
+.plan .door{fill:none;stroke:var(--muted);stroke-width:1.3;stroke-dasharray:3 3}
+.plan .dim{stroke:var(--muted);stroke-width:1}
+.plan .pill{fill:var(--surface);stroke:var(--line)}
+.plan .dimt{fill:var(--ink);font:600 12px var(--font-body)}
+.plan .area{fill:var(--accent);font:700 17px var(--font-display)}
+.plan .sub{fill:var(--muted);font:500 11.5px var(--font-body)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.facts div{background:var(--surface-2);border-radius:14px;padding:10px 12px;min-width:0}
+.facts span{display:block;font-size:12px;color:var(--muted)}
+.facts b{font:600 16px/1.3 var(--font-display);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+.smeta ol{list-style:none;margin:0;padding:0;display:grid}
+.smeta li{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.smeta li:first-child{padding-top:0}
+.smeta li.empty{color:var(--muted);font-size:14.5px;border-bottom:0;padding:4px 0}
+.si-main{flex:1;min-width:0;display:grid;gap:1px}
+.si-name{font-weight:600;font-size:15px}
+.si-qty{font-size:13px;color:var(--muted)}
+.si-sum{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.si-del{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);display:grid;place-items:center;flex:none;color:var(--muted)}
+.si-del .ico{width:16px;height:16px}
+.smeta-total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:4px;font-weight:600}
+.smeta-total b{font:700 22px var(--font-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+/* коммуналка */
+.svcs{display:grid}
+.svc{display:grid;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.svc:first-child{padding-top:2px}
+.svc:last-child{border-bottom:0;padding-bottom:0}
+.svc-head{display:flex;align-items:center;gap:11px}
+.svc-ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--g) 24%,transparent);color:var(--ink)}
+.svc-ic .ico{width:19px;height:19px}
+.svc-name{flex:1;min-width:0;font-weight:600;font-size:15.5px;line-height:1.25;cursor:pointer}
+.svc-name small{display:block;font-weight:400;font-size:12.5px;color:var(--muted);margin-top:1px}
+.svc-sum{font-weight:600;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.svc.off .svc-sum{color:var(--muted);font-weight:400;font-size:13px}
+.svc.off .svc-body{display:none}
+.svc-body{display:grid;gap:10px}
+.svc-foot{font-size:12.5px;color:var(--muted)}
+.svc-foot.warn{color:var(--warn)}
+.subhead{font-size:12.5px;font-weight:600;color:var(--muted)}
+.switch{-webkit-appearance:none;appearance:none;width:44px;height:26px;border-radius:999px;background:var(--line);position:relative;flex:none;cursor:pointer;transition:background .25s;margin:0}
+.switch::before{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .25s cubic-bezier(.3,.8,.2,1)}
+.switch:checked{background:var(--accent)}
+.switch:checked::before{transform:translateX(18px)}
+.fore{display:flex;align-items:end;gap:14px;flex-wrap:wrap}
+.fore .field{width:120px}
+.fore-out{padding-bottom:12px;font-size:15px}
+.fore-out b{font:700 18px var(--font-display);letter-spacing:-.01em}
+
+/* нижняя панель */
+.dock{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:40;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 10px 18px;border-radius:20px;background:var(--hero);color:var(--hero-ink);box-shadow:0 10px 30px rgba(0,0,0,.22);transition:transform .35s cubic-bezier(.3,.8,.2,1),opacity .3s}
+.dock.hide{transform:translateY(150%);opacity:0;pointer-events:none}
+.dock-lbl{font-size:12px;opacity:.72}
+.dock-val{font:700 20px/1.2 var(--font-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dock button{display:inline-flex;align-items:center;gap:6px;border:0;background:var(--hero-warm);color:#2a1609;border-radius:14px;padding:11px 14px;font-weight:600;font-size:14px;white-space:nowrap}
+.dock button .ico{width:17px;height:17px}
+@media (min-width:900px){.dock{display:none}}
+@media (max-width:899px){body{padding-bottom:88px}}
+
+/* вопросы */
+.faq{scroll-margin-top:90px;margin-top:56px;display:grid;gap:18px}
+.faq-head h2{font:700 clamp(26px,6vw,40px)/1.05 var(--font-display);letter-spacing:-.035em}
+.faq-head p{color:var(--muted);margin-top:8px}
+.faq-list{display:grid;gap:10px}
+@media (min-width:900px){.faq{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr);gap:40px;align-items:start}}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 1px 2px rgba(28,36,32,.04)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:17px 20px;font:600 16px/1.35 var(--font-display);letter-spacing:-.01em}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";flex:none;width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-3px);transition:transform .25s}
+.faq details[open] summary::after{transform:rotate(-135deg) translateY(-3px)}
+.faq details p{padding:0 20px 18px;color:var(--muted);font-size:15px;line-height:1.6;max-width:68ch}
+
+/* подвал */
+.foot{margin-top:56px;padding:28px 22px 22px;border-radius:28px;background:var(--hero);color:var(--hero-ink);display:grid;gap:26px}
+.foot-grid{display:grid;gap:26px}
+@media (min-width:760px){.foot{padding:40px 40px 28px}.foot-grid{grid-template-columns:1.4fr 1fr 1fr}}
+.foot .brand{color:var(--hero-ink)}
+.foot .logo{background:var(--hero-ink);color:var(--hero)}
+.foot-brand p{margin-top:12px;font-size:14.5px;line-height:1.55;opacity:.72;max-width:38ch}
+.foot-tg{display:inline-flex;align-items:center;gap:9px;margin-top:16px;padding:11px 16px 11px 13px;border-radius:14px;background:var(--hero-warm);color:#2a1609;text-decoration:none;font-weight:600;font-size:15px;transition:transform .15s}
+.foot-tg:active{transform:scale(.97)}
+.foot-tg .ico{width:18px;height:18px}
+.foot h4{margin:0 0 12px;font:600 13px/1.2 var(--font-body);letter-spacing:.04em;text-transform:uppercase;opacity:.55}
+.foot-col{display:grid;gap:9px;align-content:start}
+.foot-col a{color:var(--hero-ink);text-decoration:none;font-size:15px;opacity:.88}
+.foot-col a:hover{opacity:1;text-decoration:underline}
+.foot-col small{display:block;font-size:12.5px;opacity:.55;margin-top:1px}
+.foot-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);font-size:13px;opacity:.66;line-height:1.5}
+.foot-bottom a{color:inherit}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9v11a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1V9"/></symbol>
+    <symbol id="i-roller" viewBox="0 0 24 24"><rect x="3" y="3" width="15" height="6" rx="2"/><path d="M18 6h2a1 1 0 0 1 1 1v3.5a1 1 0 0 1-1 1h-8V14"/><rect x="10.5" y="14" width="3" height="7" rx="1.2"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6.5 6.8 6.5 11.3a6.5 6.5 0 0 1-13 0C5.5 9.8 12 3 12 3z"/></symbol>
+    <symbol id="i-hot" viewBox="0 0 24 24"><path d="M10 4s5 5.2 5 8.7a5 5 0 0 1-10 0C5 9.2 10 4 10 4z"/><path d="M17 4c1 1 1 2 0 3s-1 2 0 3M20.5 6c1 1 1 2 0 3s-1 2 0 3"/></symbol>
+    <symbol id="i-pipe" viewBox="0 0 24 24"><path d="M3 5h9a5 5 0 0 1 5 5v11"/><path d="M3 10h8a1.5 1.5 0 0 1 1.5 1.5V21"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2.5 4.5 13.5H11l-1 8 8.5-11H12z"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 21.5a6.5 6.5 0 0 0 6.5-6.5c0-3.8-2.8-5.6-3.7-9.5-1.9 1.8-2.8 3.7-2.8 5.6-.9-.9-1.9-1.9-1.9-3.7C8.2 9.2 5.5 12 5.5 15a6.5 6.5 0 0 0 6.5 6.5z"/></symbol>
+    <symbol id="i-heat" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M7.5 6v12M12 6v12M16.5 6v12M5.5 18v2.5M18.5 18v2.5"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 7h1.5M13.5 7H15M9 11h1.5M13.5 11H15M9 15h1.5M13.5 15H15"/></symbol>
+    <symbol id="i-hammer" viewBox="0 0 24 24"><path d="M13 11 4.5 19.5a1.5 1.5 0 0 0 2.1 2.1L15 13"/><path d="M11 6.5 14.5 3l6.5 6.5-3.5 3.5z"/><path d="M14.5 3c-1.5-.5-3.5 0-5 1.5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M6 7l1 13.5h10L18 7"/><path d="M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-tv" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 3l4 5 4-5"/></symbol>
+    <symbol id="i-plane" viewBox="0 0 24 24"><path d="M21.5 3 2.5 10.5l7 2.5 2.5 7.5z"/><path d="M9.5 13 21.5 3"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M15.5 8.5V5.5a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h3"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="logo"><svg class="ico"><use href="#i-home"/></svg></span>Домосчёт</div>
+    <nav class="top-links" aria-label="Разделы">
+      <a href="#ipoteka" data-go="ipoteka">Ипотека</a>
+      <a href="#materialy" data-go="materialy">Ремонт</a>
+      <a href="#zhkh" data-go="zhkh">ЖКХ</a>
+      <a href="#faq">Вопросы</a>
+    </nav>
+    <a class="author" href="https://t.me/mecenero" target="_blank" rel="noopener"><svg class="ico"><use href="#i-plane"/></svg><span><span class="a-pre">Автор сайта </span><b>@mecenero</b></span></a>
+  </header>
+
+  <section class="hero">
+    <div>
+      <span class="pill"><i class="live" aria-hidden="true"></i>Ставки банков на 11.11.2026</span>
+      <h1>Считаем ипотеку, ремонт и&nbsp;коммуналку</h1>
+      <p class="lead">Платёж по кредиту, материалы на комнату и квитанция за месяц. Впишите свои цифры, и итог пересчитается сразу.</p>
+      <div class="hero-cta">
+        <a class="btn-dark" href="#ipoteka" data-go="ipoteka">Рассчитать ипотеку<svg class="ico"><use href="#i-down"/></svg></a>
+        <a class="btn-ghost" href="#materialy" data-go="materialy">Посчитать ремонт</a>
+      </div>
+      <div class="stats">
+        <div><b>3</b><span>калькулятора в одном месте</span></div>
+        <div><b>7</b><span>видов материалов со сметой</span></div>
+        <div><b>0&nbsp;₽</b><span>без регистрации и рекламы</span></div>
+      </div>
+    </div>
+    <figure class="hero-media">
+      <img src="../assets/img/hero.webp" width="1600" height="1120" alt="Макет современного дома с террасой и газоном" fetchpriority="high" decoding="async">
+      <button type="button" class="peek peek-a" data-go="ipoteka"><span>Платёж по ипотеке</span><b id="peek-m">—</b></button>
+      <button type="button" class="peek peek-b" data-go="zhkh"><span>Коммуналка за месяц</span><b id="peek-z">—</b></button>
+    </figure>
+  </section>
+
+  <nav class="tabs-wrap" aria-label="Калькуляторы">
+    <div class="tabs" role="tablist" id="tabs">
+      <span class="tab-ind" aria-hidden="true"></span>
+      <a role="tab" href="#ipoteka" id="tab-ipoteka" aria-controls="sheet-ipoteka" aria-selected="true"><svg class="ico"><use href="#i-home"/></svg><span>Ипотека</span></a>
+      <a role="tab" href="#materialy" id="tab-materialy" aria-controls="sheet-materialy" aria-selected="false" tabindex="-1"><svg class="ico"><use href="#i-roller"/></svg><span>Ремонт</span></a>
+      <a role="tab" href="#zhkh" id="tab-zhkh" aria-controls="sheet-zhkh" aria-selected="false" tabindex="-1"><svg class="ico"><use href="#i-drop"/></svg><span>ЖКХ</span></a>
+    </div>
+  </nav>
+
+  <!-- ═════════ ИПОТЕКА ═════════ -->
+  <section class="sheet" id="sheet-ipoteka" role="tabpanel" aria-labelledby="tab-ipoteka">
+    <div class="phead">
+      <div>
+        <h2>Ипотека</h2>
+        <p>Узнайте платёж в месяц, сколько уйдёт на проценты и как сократить срок досрочными платежами.</p>
+        <div class="feat"><span>Два типа платежа</span><span>Досрочное погашение</span><span>График по годам</span></div>
+      </div>
+      <img class="phead-img" src="../assets/img/ipoteka.webp" width="640" height="480" alt="Домик, стопки монет и ключ" loading="lazy" decoding="async">
+    </div>
+    <div class="layout">
+      <div class="col">
+        <div class="card">
+          <div class="step"><span class="step-n">1</span><h3>Квартира и взнос</h3></div>
+          <div class="field">
+            <label for="m-price">Стоимость жилья</label>
+            <div class="inp"><input id="m-price" data-d="0" value="8500000"><span class="unit">₽</span></div>
+            <input type="range" class="range" id="m-price-r" min="500000" max="50000000" step="100000" aria-label="Стоимость жилья, ползунок">
+          </div>
+          <div class="field">
+            <div class="lrow"><label for="m-down">Первоначальный взнос</label><span class="badge" id="m-down-pct"></span></div>
+            <div class="inp"><input id="m-down" data-d="0" value="2000000"><span class="unit">₽</span></div>
+            <input type="range" class="range" id="m-down-r" min="0" max="90" step="1" aria-label="Первоначальный взнос в процентах, ползунок">
+            <p class="hint warn" id="m-warn" hidden>Для льготных программ банки обычно просят взнос от 20%.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="step"><span class="step-n">2</span><h3>Ставка и срок</h3></div>
+          <div class="field">
+            <span class="lbl" id="m-prog-l">Программа</span>
+            <div class="chips" role="group" aria-labelledby="m-prog-l">
+              <button type="button" class="chip" data-rate="18.7">Рыночная <b>18,7%</b></button>
+              <button type="button" class="chip" data-rate="6">Семейная <b>6%</b></button>
+              <button type="button" class="chip" data-rate="2">Дальневосточная <b>2%</b></button>
+            </div>
+            <p class="hint">Рыночная ставка: средняя по банкам на 11 ноября 2026. Нажмите на программу или впишите ставку своего банка.</p>
+          </div>
+          <div class="fields">
+            <div class="field">
+              <label for="m-term">Срок</label>
+              <div class="inp"><input id="m-term" data-d="0" value="20"><span class="unit">лет</span></div>
+              <input type="range" class="range" id="m-term-r" min="1" max="30" step="1" aria-label="Срок, ползунок">
+            </div>
+            <div class="field">
+              <label for="m-rate">Ставка</label>
+              <div class="inp"><input id="m-rate" data-d="2" value="18.7"><span class="unit">%</span></div>
+              <input type="range" class="range" id="m-rate-r" min="0" max="30" step="0.1" aria-label="Ставка, ползунок">
+            </div>
+          </div>
+          <div class="field">
+            <span class="lbl" id="m-type-l">Как платить</span>
+            <div class="seg" role="group" aria-labelledby="m-type-l">
+              <button type="button" data-mtype="ann" aria-pressed="true">Равными платежами</button>
+              <button type="button" data-mtype="diff" aria-pressed="false">С уменьшением</button>
+            </div>
+            <p class="hint" id="m-type-hint"></p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="step"><span class="step-n">3</span><h3>Досрочное погашение</h3><span class="opt">по желанию</span></div>
+          <div class="field">
+            <label for="m-extra">Сколько доплачивать каждый месяц</label>
+            <div class="inp"><input id="m-extra" data-d="0" value="0"><span class="unit">₽ в месяц</span></div>
+            <p class="hint">Доплата сразу идёт в счёт долга и сокращает срок. Попробуйте 10 000 ₽.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col out" id="out-ipoteka" data-out="ipoteka">
+        <div class="result">
+          <div class="r-label" id="m-lbl">Платёж в месяц</div>
+          <div class="r-big"><span id="m-pay">0</span><small>₽</small></div>
+          <p class="r-say" id="m-say"></p>
+          <div class="r-grid" id="m-tiles"></div>
+          <div class="r-actions"><button type="button" class="btn-warm" id="m-copy"><svg class="ico"><use href="#i-copy"/></svg>Скопировать расчёт</button><span class="r-status" id="m-status" role="status"></span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Из чего состоят выплаты</div>
+          <div class="bar" id="m-bar" aria-hidden="true"></div>
+          <div class="legend" id="m-legend"></div>
+        </div>
+        <div class="card chart">
+          <div class="chart-head"><div class="card-title">Как уменьшается долг</div><div class="chart-leg" id="m-chart-leg"></div></div>
+          <svg id="m-chart" viewBox="0 0 600 220" role="img" aria-label="График остатка долга по годам"></svg>
+        </div>
+        <details class="sched" id="m-sched">
+          <summary>График платежей по годам</summary>
+          <div class="tbl"><table><thead><tr><th>Год</th><th>Заплачено</th><th>Проценты</th><th>В долг</th><th>Остаток</th></tr></thead><tbody id="m-table"></tbody></table></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ МАТЕРИАЛЫ ═════════ -->
+  <section class="sheet" id="sheet-materialy" role="tabpanel" aria-labelledby="tab-materialy" hidden>
+    <div class="phead">
+      <div>
+        <h2>Материалы</h2>
+        <p>Сколько купить обоев, краски, плитки, блоков или бетона. Собирайте всё в смету и копируйте одним списком.</p>
+        <div class="feat"><span>Запас на подрезку</span><span>Смета одним списком</span><span>План комнаты</span></div>
+      </div>
+      <img class="phead-img" src="../assets/img/remont.webp" width="640" height="480" alt="Банка краски, валик и кирпичи" loading="lazy" decoding="async">
+    </div>
+    <div class="layout">
+      <div class="col">
+        <div class="card">
+          <div class="step"><span class="step-n">1</span><h3>Что считаем</h3></div>
+          <div class="mpick" role="group" aria-label="Материал" id="mpick">
+            <button type="button" data-mat="oboi"><img src="../assets/img/m-oboi.webp" width="168" height="168" alt="" loading="lazy" decoding="async">Обои</button>
+            <button type="button" data-mat="kraska"><img src="../assets/img/m-kraska.webp" width="168" height="168" alt="" loading="lazy" decoding="async">Краска</button>
+            <button type="button" data-mat="plitka"><img src="../assets/img/m-plitka.webp" width="168" height="168" alt="" loading="lazy" decoding="async">Плитка</button>
+            <button type="button" data-mat="laminat"><img src="../assets/img/m-laminat.webp" width="168" height="168" alt="" loading="lazy" decoding="async">Ламинат</button>
+            <button type="button" data-mat="shtuk"><img src="../assets/img/m-shtuk.webp" width="168" height="168" alt="" loading="lazy" decoding="async">Штукатурка</button>
+            <button type="button" data-mat="kladka"><img src="../assets/img/m-kladka.webp" width="168" height="168" alt="" loading="lazy" decoding="async">Кладка</button>
+            <button type="button" data-mat="beton"><img src="../assets/img/m-beton.webp" width="168" height="168" alt="" loading="lazy" decoding="async">Бетон, стяжка</button>
+          </div>
+        </div>
+
+        <div class="card" id="room">
+          <div class="step"><span class="step-n">2</span><h3>Размеры комнаты</h3></div>
+          <div class="plan"><svg id="plan" viewBox="0 0 340 230" role="img" aria-label="План комнаты с размерами"></svg></div>
+          <div class="fields three">
+            <div class="field"><label for="r-l">Длина, м</label><div class="inp"><input id="r-l" data-d="2" value="5.2"></div></div>
+            <div class="field"><label for="r-w">Ширина, м</label><div class="inp"><input id="r-w" data-d="2" value="3.8"></div></div>
+            <div class="field"><label for="r-h">Высота, м</label><div class="inp"><input id="r-h" data-d="2" value="2.7"></div></div>
+            <div class="field"><label for="r-wc">Окон</label><div class="inp"><input id="r-wc" data-d="0" value="1"></div></div>
+            <div class="field"><label for="r-ww">Ширина окна, м</label><div class="inp"><input id="r-ww" data-d="2" value="1.4"></div></div>
+            <div class="field"><label for="r-wh">Высота окна, м</label><div class="inp"><input id="r-wh" data-d="2" value="1.5"></div></div>
+            <div class="field"><label for="r-dc">Дверей</label><div class="inp"><input id="r-dc" data-d="0" value="1"></div></div>
+            <div class="field"><label for="r-dw">Ширина двери, м</label><div class="inp"><input id="r-dw" data-d="2" value="0.9"></div></div>
+            <div class="field"><label for="r-dh">Высота двери, м</label><div class="inp"><input id="r-dh" data-d="2" value="2.05"></div></div>
+          </div>
+          <div class="facts" id="room-facts"></div>
+        </div>
+
+        <div class="card">
+          <div class="step"><span class="step-n" id="mat-no">3</span><h3 id="mat-title">Обои</h3></div>
+
+          <div class="mat card-in" data-mat="oboi">
+            <div class="fields">
+              <div class="field"><label for="o-rw">Ширина рулона</label><div class="inp sel"><select id="o-rw"><option value="0.53">0,53 м</option><option value="0.7">0,70 м</option><option value="1.06" selected>1,06 м</option></select></div></div>
+              <div class="field"><label for="o-rl">Длина рулона</label><div class="inp"><input id="o-rl" data-d="2" value="10.05"><span class="unit">м</span></div></div>
+              <div class="field"><label for="o-rap">Раппорт рисунка</label><div class="inp"><input id="o-rap" data-d="0" value="0"><span class="unit">см</span></div></div>
+              <div class="field"><label for="o-price">Цена рулона</label><div class="inp"><input id="o-price" data-d="0" value="1800"><span class="unit">₽</span></div></div>
+            </div>
+            <label class="check"><input type="checkbox" id="o-res" checked><span>Взять один рулон про запас</span></label>
+            <p class="hint">Раппорт — шаг повтора рисунка, он указан на этикетке. Для однотонных обоев оставьте 0.</p>
+          </div>
+
+          <div class="mat card-in" data-mat="kraska" hidden>
+            <div class="fields">
+              <div class="field"><label for="k-surf">Что красим</label><div class="inp sel"><select id="k-surf"><option value="walls">Стены</option><option value="ceil">Потолок</option><option value="both">Стены и потолок</option></select></div></div>
+              <div class="field"><label for="k-layers">Слоёв</label><div class="inp"><input id="k-layers" data-d="0" value="2"></div></div>
+              <div class="field"><label for="k-rate">Расход на слой</label><div class="inp"><input id="k-rate" data-d="3" value="0.12"><span class="unit">л/м²</span></div></div>
+              <div class="field"><label for="k-can">Объём банки</label><div class="inp"><input id="k-can" data-d="2" value="2.7"><span class="unit">л</span></div></div>
+              <div class="field full"><label for="k-price">Цена банки</label><div class="inp"><input id="k-price" data-d="0" value="1900"><span class="unit">₽</span></div></div>
+            </div>
+            <p class="hint">На банке пишут «1 л на 8–10 м²», это 0,10–0,12 л/м² на один слой.</p>
+          </div>
+
+          <div class="mat card-in" data-mat="plitka" hidden>
+            <div class="fields">
+              <div class="field"><label for="p-surf">Где кладём</label><div class="inp sel"><select id="p-surf"><option value="floor">Пол</option><option value="walls">Стены</option><option value="custom">Своя площадь</option></select></div></div>
+              <div class="field" id="p-area-f"><label for="p-area">Площадь</label><div class="inp"><input id="p-area" data-d="2" value="6"><span class="unit">м²</span></div></div>
+              <div class="field"><label for="p-tl">Длина плитки</label><div class="inp"><input id="p-tl" data-d="1" value="60"><span class="unit">см</span></div></div>
+              <div class="field"><label for="p-tw">Ширина плитки</label><div class="inp"><input id="p-tw" data-d="1" value="30"><span class="unit">см</span></div></div>
+              <div class="field full"><label for="p-lay">Раскладка</label><div class="inp sel"><select id="p-lay"><option value="0.07">Прямая, запас 7%</option><option value="0.1">Со смещением, запас 10%</option><option value="0.15">По диагонали, запас 15%</option></select></div></div>
+              <div class="field"><label for="p-box">В коробке</label><div class="inp"><input id="p-box" data-d="3" value="1.44"><span class="unit">м²</span></div></div>
+              <div class="field"><label for="p-price">Цена за м²</label><div class="inp"><input id="p-price" data-d="0" value="1600"><span class="unit">₽</span></div></div>
+              <div class="field"><label for="p-joint">Шов</label><div class="inp"><input id="p-joint" data-d="1" value="2"><span class="unit">мм</span></div></div>
+              <div class="field"><label for="p-glue">Расход клея</label><div class="inp"><input id="p-glue" data-d="1" value="5"><span class="unit">кг/м²</span></div></div>
+            </div>
+            <p class="hint">Клей обычно 4–6 кг/м², считаем мешками по 25 кг. Затирку считаем для плитки толщиной 8 мм.</p>
+          </div>
+
+          <div class="mat card-in" data-mat="laminat" hidden>
+            <div class="fields">
+              <div class="field"><label for="l-bl">Длина доски</label><div class="inp"><input id="l-bl" data-d="0" value="1380"><span class="unit">мм</span></div></div>
+              <div class="field"><label for="l-bw">Ширина доски</label><div class="inp"><input id="l-bw" data-d="0" value="193"><span class="unit">мм</span></div></div>
+              <div class="field"><label for="l-pc">Досок в упаковке</label><div class="inp"><input id="l-pc" data-d="0" value="8"><span class="unit">шт</span></div></div>
+              <div class="field"><label for="l-lay">Укладка</label><div class="inp sel"><select id="l-lay"><option value="0.05">Прямая, +5%</option><option value="0.15">Диагональ, +15%</option></select></div></div>
+              <div class="field full"><label for="l-price">Цена упаковки</label><div class="inp"><input id="l-price" data-d="0" value="2300"><span class="unit">₽</span></div></div>
+              <div class="field"><label for="l-pl">Длина плинтуса</label><div class="inp"><input id="l-pl" data-d="2" value="2.5"><span class="unit">м</span></div></div>
+              <div class="field"><label for="l-plp">Цена плинтуса</label><div class="inp"><input id="l-plp" data-d="0" value="350"><span class="unit">₽</span></div></div>
+            </div>
+            <p class="hint">Площадь пола берём из размеров комнаты. Размеры доски и количество в упаковке указаны на коробке.</p>
+          </div>
+
+          <div class="mat card-in" data-mat="shtuk" hidden>
+            <div class="fields">
+              <div class="field"><label for="s-surf">Что выравниваем</label><div class="inp sel"><select id="s-surf"><option value="walls">Стены</option><option value="ceil">Потолок</option><option value="both">Стены и потолок</option></select></div></div>
+              <div class="field"><label for="s-type">Смесь</label><div class="inp sel"><select id="s-type">
+                <option value="gyp" data-rate="0.9" data-bag="30" data-price="550" data-thick="10">Гипсовая</option>
+                <option value="cem" data-rate="1.7" data-bag="25" data-price="400" data-thick="15">Цементная</option>
+                <option value="put" data-rate="1.1" data-bag="20" data-price="650" data-thick="2">Шпаклёвка</option>
+              </select></div></div>
+              <div class="field"><label for="s-thick">Средний слой</label><div class="inp"><input id="s-thick" data-d="1" value="10"><span class="unit">мм</span></div></div>
+              <div class="field"><label for="s-rate">Расход на 1 мм</label><div class="inp"><input id="s-rate" data-d="2" value="0.9"><span class="unit">кг/м²</span></div></div>
+              <div class="field"><label for="s-bag">Мешок</label><div class="inp"><input id="s-bag" data-d="0" value="30"><span class="unit">кг</span></div></div>
+              <div class="field"><label for="s-price">Цена мешка</label><div class="inp"><input id="s-price" data-d="0" value="550"><span class="unit">₽</span></div></div>
+            </div>
+            <p class="hint">Средний слой прикиньте по перепадам стены: обычно 5–20 мм. Расход на 1 мм указан на мешке.</p>
+          </div>
+
+          <div class="mat card-in" data-mat="kladka" hidden>
+            <div class="fields">
+              <div class="field full"><label for="b-type">Материал</label><div class="inp sel"><select id="b-type">
+                <option value="gb300">Газоблок 600×250×300</option>
+                <option value="gb200">Газоблок 600×250×200</option>
+                <option value="gb400">Газоблок 600×250×400</option>
+                <option value="brick1">Кирпич одинарный 250×120×65</option>
+                <option value="brick15">Кирпич полуторный 250×120×88</option>
+              </select></div></div>
+              <div class="field full" id="b-th-f"><label for="b-th">Толщина стены</label><div class="inp sel"><select id="b-th">
+                <option value="0.5">В полкирпича, 120 мм</option>
+                <option value="1" selected>В кирпич, 250 мм</option>
+                <option value="1.5">В полтора кирпича, 380 мм</option>
+                <option value="2">В два кирпича, 510 мм</option>
+              </select></div></div>
+              <div class="field"><label for="b-len">Длина всех стен</label><div class="inp"><input id="b-len" data-d="2" value="30"><span class="unit">м</span></div></div>
+              <div class="field"><label for="b-h">Высота стен</label><div class="inp"><input id="b-h" data-d="2" value="3"><span class="unit">м</span></div></div>
+              <div class="field"><label for="b-open">Окна и двери</label><div class="inp"><input id="b-open" data-d="2" value="8"><span class="unit">м²</span></div></div>
+              <div class="field"><label for="b-price">Цена штуки</label><div class="inp"><input id="b-price" data-d="2" value="330"><span class="unit">₽</span></div></div>
+            </div>
+            <p class="hint">Кирпич считаем со швом 10 мм, газоблок на клею со швом 3 мм. Плюс 5% на бой и подрезку.</p>
+          </div>
+
+          <div class="mat card-in" data-mat="beton" hidden>
+            <div class="fields">
+              <div class="field full"><label for="c-type">Что заливаем</label><div class="inp sel"><select id="c-type">
+                <option value="lenta">Ленточный фундамент</option>
+                <option value="plita">Монолитная плита</option>
+                <option value="styazhka">Стяжка пола</option>
+              </select></div></div>
+              <div class="field full" data-ctype="lenta"><label for="c-len">Длина ленты (все стены)</label><div class="inp"><input id="c-len" data-d="2" value="40"><span class="unit">м</span></div></div>
+              <div class="field" data-ctype="lenta"><label for="c-w">Ширина ленты</label><div class="inp"><input id="c-w" data-d="2" value="0.4"><span class="unit">м</span></div></div>
+              <div class="field" data-ctype="lenta"><label for="c-h">Высота ленты</label><div class="inp"><input id="c-h" data-d="2" value="1.2"><span class="unit">м</span></div></div>
+              <div class="field" data-ctype="plita"><label for="c-pl">Длина плиты</label><div class="inp"><input id="c-pl" data-d="2" value="10"><span class="unit">м</span></div></div>
+              <div class="field" data-ctype="plita"><label for="c-pw">Ширина плиты</label><div class="inp"><input id="c-pw" data-d="2" value="8"><span class="unit">м</span></div></div>
+              <div class="field full" data-ctype="plita"><label for="c-pt">Толщина плиты</label><div class="inp"><input id="c-pt" data-d="2" value="0.25"><span class="unit">м</span></div></div>
+              <div class="field" data-ctype="lenta plita"><label for="c-mix">Объём миксера</label><div class="inp"><input id="c-mix" data-d="1" value="7"><span class="unit">м³</span></div></div>
+              <div class="field" data-ctype="lenta plita"><label for="c-price">Цена бетона</label><div class="inp"><input id="c-price" data-d="0" value="6500"><span class="unit">₽/м³</span></div></div>
+              <div class="field" data-ctype="styazhka"><label for="c-sa">Площадь пола</label><div class="inp"><input id="c-sa" data-d="2" value="20"><span class="unit">м²</span></div></div>
+              <div class="field" data-ctype="styazhka"><label for="c-st">Толщина</label><div class="inp"><input id="c-st" data-d="0" value="50"><span class="unit">мм</span></div></div>
+              <div class="field" data-ctype="styazhka"><label for="c-sr">Расход на 1 мм</label><div class="inp"><input id="c-sr" data-d="2" value="2"><span class="unit">кг/м²</span></div></div>
+              <div class="field" data-ctype="styazhka"><label for="c-sb">Мешок</label><div class="inp"><input id="c-sb" data-d="0" value="40"><span class="unit">кг</span></div></div>
+              <div class="field full" data-ctype="styazhka"><label for="c-sp">Цена мешка</label><div class="inp"><input id="c-sp" data-d="0" value="350"><span class="unit">₽</span></div></div>
+            </div>
+            <p class="hint" data-ctype="lenta plita">Длина ленты — наружный периметр плюс внутренние несущие стены. Бетон считаем с запасом 5%.</p>
+            <p class="hint" data-ctype="styazhka">Расход сухой смеси указан на мешке. Для цементно-песчаной обычно около 2 кг/м² на 1 мм.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col out" id="out-materialy" data-out="materialy">
+        <div class="result">
+          <div class="r-label" id="mat-lbl">Нужно купить</div>
+          <div class="r-big"><span id="mat-main">0</span><small id="mat-unit"></small></div>
+          <p class="r-say" id="mat-say"></p>
+          <div class="r-grid" id="mat-tiles"></div>
+          <div class="r-actions"><button type="button" class="btn-warm" id="mat-add"><svg class="ico"><use href="#i-plus"/></svg>Добавить в смету</button><span class="r-status" id="mat-status" role="status"></span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Подробности</div>
+          <div class="list" id="mat-list"></div>
+          <p class="hint">Цены примерные. Поставьте цены своего магазина, и всё пересчитается.</p>
+        </div>
+        <div class="card smeta">
+          <div class="card-title">Смета</div>
+          <ol id="smeta-list"></ol>
+          <div class="smeta-total"><span>Итого</span><b id="smeta-sum">0 ₽</b></div>
+          <div class="btns">
+            <button class="btn" type="button" id="smeta-copy"><svg class="ico"><use href="#i-copy"/></svg>Скопировать</button>
+            <button class="btn" type="button" id="smeta-clear">Очистить</button>
+            <span class="status" id="smeta-status" role="status"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ ЖКХ ═════════ -->
+  <section class="sheet" id="sheet-zhkh" role="tabpanel" aria-labelledby="tab-zhkh" hidden>
+    <div class="phead">
+      <div>
+        <h2>Коммуналка</h2>
+        <p>Впишите показания счётчиков и тарифы из квитанции. Отключите то, за что вы не платите.</p>
+        <div class="feat"><span>Показания счётчиков</span><span>День и ночь</span><span>Прогноз на 2027</span></div>
+      </div>
+      <img class="phead-img" src="../assets/img/zhkh.webp" width="640" height="480" alt="Радиатор, смеситель и вилка" loading="lazy" decoding="async">
+    </div>
+    <div class="layout">
+      <div class="col">
+        <div class="card">
+          <div class="step"><span class="step-n">1</span><h3>Квартира</h3></div>
+          <div class="fields">
+            <div class="field"><label for="z-area">Площадь</label><div class="inp"><input id="z-area" data-d="1" value="52"><span class="unit">м²</span></div></div>
+            <div class="field"><label for="z-people">Прописано</label><div class="inp"><input id="z-people" data-d="0" value="2"><span class="unit">чел.</span></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="step"><span class="step-n">2</span><h3>Счётчики</h3></div>
+          <div class="svcs" id="z-meters"></div>
+        </div>
+        <div class="card">
+          <div class="step"><span class="step-n">3</span><h3>Остальное в квитанции</h3></div>
+          <div class="svcs" id="z-fixed"></div>
+          <p class="hint">Тарифы стоят для примера. Перепишите их из своей квитанции: они разные в каждом регионе и у каждой управляющей компании.</p>
+        </div>
+      </div>
+
+      <div class="col out" id="out-zhkh" data-out="zhkh">
+        <div class="result">
+          <div class="r-label">Итого за месяц</div>
+          <div class="r-big"><span id="z-total">0</span><small>₽</small></div>
+          <p class="r-say" id="z-say"></p>
+          <div class="r-grid" id="z-tiles"></div>
+          <div class="r-actions"><button type="button" class="btn-warm" id="z-copy"><svg class="ico"><use href="#i-copy"/></svg>Скопировать расчёт</button><span class="r-status" id="z-status" role="status"></span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Куда уходят деньги</div>
+          <div class="bar" id="z-bar" aria-hidden="true"></div>
+          <div class="legend" id="z-legend"></div>
+          <div class="list" id="z-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Если тарифы вырастут</div>
+          <div class="fore">
+            <div class="field"><label for="z-grow">Рост</label><div class="inp"><input id="z-grow" data-d="1" value="7.9"><span class="unit">%</span></div></div>
+            <div class="fore-out" id="z-fore"></div>
+          </div>
+          <p class="hint">Минэкономразвития прогнозирует рост платы за коммуналку на 7,9% в 2027 году.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <div class="faq-head">
+      <h2>Вопросы</h2>
+      <p>Коротко о том, как считаются цифры.</p>
+    </div>
+    <div class="faq-list">
+      <details>
+        <summary>Насколько точно считается ипотека?</summary>
+        <p>По тем же формулам, что у банков: аннуитетный и дифференцированный платёж, проценты на остаток долга каждый месяц. Реальный платёж может отличаться на страховку и комиссии, их банк называет отдельно.</p>
+      </details>
+      <details>
+        <summary>Откуда ставка 18,7%?</summary>
+        <p>Это средняя рыночная ставка по обзору ставок банков на 11 ноября 2026 года. Если банк предложил вам другую, впишите её в поле «Ставка».</p>
+      </details>
+      <details>
+        <summary>Зачем материалы считаются с запасом?</summary>
+        <p>Часть материала уходит на подрезку, подгонку рисунка и бой. Запас указан в каждом расчёте: 5–15% для плитки и ламината, рулон про запас для обоев, 5% для блоков и бетона.</p>
+      </details>
+      <details>
+        <summary>Где взять тарифы на коммуналку?</summary>
+        <p>В последней квитанции: там указан тариф для каждой услуги. Тарифы меняются раз в год и зависят от региона и управляющей компании.</p>
+      </details>
+      <details>
+        <summary>Куда сохраняются мои цифры?</summary>
+        <p>Только в браузере на вашем устройстве, чтобы при следующем открытии не вводить всё заново. На сервер ничего не отправляется.</p>
+      </details>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <div class="brand"><span class="logo"><svg class="ico"><use href="#i-home"/></svg></span>Домосчёт</div>
+        <p>Калькуляторы для тех, кто покупает жильё, делает ремонт или проверяет квитанцию.</p>
+        <a class="foot-tg" href="https://t.me/mecenero" target="_blank" rel="noopener"><svg class="ico"><use href="#i-plane"/></svg>Автор: @mecenero</a>
+      </div>
+      <div class="foot-col">
+        <h4>Калькуляторы</h4>
+        <a href="#ipoteka" data-go="ipoteka">Ипотека</a>
+        <a href="#materialy" data-go="materialy">Материалы для ремонта</a>
+        <a href="#zhkh" data-go="zhkh">Коммунальные платежи</a>
+        <a href="#faq">Вопросы</a>
+      </div>
+      <div class="foot-col">
+        <h4>Источники</h4>
+        <a href="https://xn--h1alcedd.xn--d1aqf.xn--p1ai/news/obzor-stavok-po-ipoteke-v-bankakh-na-11-noyabrya-2026-goda/" target="_blank" rel="noopener">Ставки по ипотеке<small>спроси.дом.рф, 11.11.2026</small></a>
+        <a href="https://www.cian.ru/stati-tarify-zhkh-kakie-izmenenija-i-mozhno-li-snizit-340749/" target="_blank" rel="noopener">Прогноз тарифов ЖКХ<small>Циан, данные Минэкономразвития</small></a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Домосчёт. Расчёты ориентировочные и не являются офертой банка.</span>
+      <span>Сайт сделал <a href="https://t.me/mecenero" target="_blank" rel="noopener">@mecenero</a> в Telegram</span>
+    </div>
+  </footer>
+</div>
+
+<div class="dock hide" id="dock">
+  <div><div class="dock-lbl" id="dock-lbl">Платёж в месяц</div><div class="dock-val" id="dock-val">—</div></div>
+  <button type="button" id="dock-go">Подробнее<svg class="ico"><use href="#i-down"/></svg></button>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ───────── утилиты ───────── */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const reduceMotion=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+const NF={};
+function fmt(n,d){ d=d==null?0:d; if(!Number.isFinite(n)) n=0; if(!NF[d]) NF[d]=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:d}); return NF[d].format(n); }
+function rub(n){ return fmt(Math.round(n))+' ₽'; }
+function money(n){ return Math.abs(n)>=1e6 ? fmt(n/1e6,2)+' млн ₽' : rub(n); }
+function parse(v){ const s=String(v==null?'':v).replace(/[\s  ]/g,'').replace(',','.'); const n=parseFloat(s); return Number.isFinite(n)?n:0; }
+function val(id){ const el=document.getElementById(id); return el?parse(el.value):0; }
+function pos(id){ return Math.max(0,val(id)); }
+function plural(n,a,b,c){ n=Math.abs(Math.round(n))%100; const n1=n%10; if(n>10&&n<20) return c; if(n1>1&&n1<5) return b; if(n1===1) return a; return c; }
+function esc(s){ return String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])); }
+function ceil(x){ return Math.ceil(x-1e-9); }
+function fmtTerm(m){ const y=Math.floor(m/12), mo=m%12; let s=''; if(y) s+=y+' '+plural(y,'год','года','лет'); if(mo) s+=(s?' ':'')+mo+' мес.'; return s||'0 мес.'; }
+function short(v){ if(v>=1e6) return fmt(v/1e6, v>=1e7?0:1)+' млн'; if(v>=1e3) return fmt(v/1e3,0)+' тыс.'; return fmt(v,0); }
+
+/* плавное изменение больших чисел */
+function tween(el,to,d){
+  d=d||0;
+  const from=el._v==null?to:el._v; el._v=to;
+  cancelAnimationFrame(el._raf);
+  if(reduceMotion||from===to){ el.textContent=fmt(to,d); return; }
+  const t0=performance.now(), dur=420;
+  const step=now=>{ const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-k,3); el.textContent=fmt(from+(to-from)*e,d); if(k<1) el._raf=requestAnimationFrame(step); };
+  el._raf=requestAnimationFrame(step);
+}
+function list(el,rows){
+  el.innerHTML=rows.filter(Boolean).map(r=>'<div class="li '+(r[2]||'')+'"><span class="l">'+r[0]+(r[3]?'<small>'+r[3]+'</small>':'')+'</span><span class="v">'+r[1]+'</span></div>').join('');
+}
+function tiles(el,rows){
+  el.innerHTML=rows.filter(Boolean).map(r=>'<div class="r-tile '+(r[2]||'')+'"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('');
+}
+function flash(el,msg,bad){ el.textContent=msg; el.classList.toggle('bad',!!bad); clearTimeout(el._t); el._t=setTimeout(()=>{el.textContent='';},2600); }
+async function copyText(text,statusEl){
+  let ok=false;
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); ok=true; } }catch(e){}
+  if(!ok){ try{ const ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); ok=document.execCommand('copy'); ta.remove(); }catch(e){} }
+  flash(statusEl, ok?'Скопировано':'Не получилось скопировать', !ok);
+}
+
+/* ───────── хранение ───────── */
+const KEY='dom-calc-v1', SKEY='dom-calc-smeta-v1';
+function load(k,def){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } }
+function store(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+const saved=load(KEY,{})||{};
+const state=Object.assign({mType:'ann',mat:'oboi',elMode:'one'},saved.__state||{});
+let saveT=null;
+function persist(){
+  clearTimeout(saveT);
+  saveT=setTimeout(()=>{
+    const o={__state:state};
+    $$('input[id],select[id]').forEach(el=>{ if(el.type==='range') return; o[el.id]=el.type==='checkbox'?el.checked:el.value; });
+    store(KEY,o);
+  },400);
+}
+
+/* ───────── ЖКХ: разметка ───────── */
+const ZH=[
+  {id:'cold',name:'Холодная вода',grp:'water',ic:'i-drop',kind:'meter',u:'м³',prev:245.3,cur:251.1,t:68,tu:'₽/м³'},
+  {id:'hot',name:'Горячая вода',grp:'water',ic:'i-hot',kind:'meter',u:'м³',prev:120.4,cur:123.9,t:355,tu:'₽/м³'},
+  {id:'drain',name:'Водоотведение',sub:'считается само из воды',grp:'water',ic:'i-pipe',kind:'drain',t:55,tu:'₽/м³'},
+  {id:'el',name:'Электричество',grp:'energy',ic:'i-bolt',kind:'el'},
+  {id:'gas',name:'Газ',grp:'energy',ic:'i-flame',kind:'meter',u:'м³',prev:3410,cur:3418,t:9,tu:'₽/м³',off:true},
+  {id:'heat',name:'Отопление',grp:'energy',ic:'i-heat',kind:'qty',qu:'Гкал',q:1.1,t:3400,tu:'₽/Гкал',fixed:true},
+  {id:'maint',name:'Содержание дома',sub:'за каждый м²',grp:'house',ic:'i-building',kind:'area',t:40,tu:'₽/м²',fixed:true},
+  {id:'cap',name:'Капремонт',sub:'за каждый м²',grp:'house',ic:'i-hammer',kind:'area',t:30,tu:'₽/м²',fixed:true},
+  {id:'tko',name:'Вывоз мусора',sub:'за каждого прописанного',grp:'house',ic:'i-trash',kind:'people',t:180,tu:'₽/чел.',fixed:true},
+  {id:'other',name:'Домофон, антенна',sub:'фиксированная сумма',grp:'house',ic:'i-tv',kind:'fixed',sum:250,fixed:true},
+];
+const GRP={water:{name:'Вода',v:'--c3'},energy:{name:'Свет, газ, тепло',v:'--c2'},house:{name:'Дом',v:'--c1'}};
+function dn(v){ return String(v).replace('.',','); }
+function fld(id,label,value,d){ return '<div class="field"><label for="'+id+'">'+label+'</label><div class="inp"><input id="'+id+'" data-d="'+d+'" value="'+dn(value)+'"></div></div>'; }
+function svcHTML(s){
+  let body='';
+  if(s.kind==='meter') body='<div class="fields three">'+fld('z-'+s.id+'-prev','Было, '+s.u,s.prev,3)+fld('z-'+s.id+'-cur','Стало, '+s.u,s.cur,3)+fld('z-'+s.id+'-t','Тариф, '+s.tu,s.t,2)+'</div>';
+  else if(s.kind==='drain') body='<div class="fields three">'+fld('z-drain-t','Тариф, '+s.tu,s.t,2)+'</div>';
+  else if(s.kind==='el') body='<div class="seg" role="group" aria-label="Тариф на электричество"><button type="button" data-elmode="one">Один тариф</button><button type="button" data-elmode="two">День и ночь</button></div>'+
+      '<div class="fields three" id="z-el-one">'+fld('z-el-prev','Было, кВт·ч',15230,1)+fld('z-el-cur','Стало, кВт·ч',15420,1)+fld('z-el-t','Тариф, ₽',9,2)+'</div>'+
+      '<div id="z-el-two" class="svc-body"><div class="subhead">День</div><div class="fields three">'+fld('z-el-dp','Было',10200,1)+fld('z-el-dc','Стало',10330,1)+fld('z-el-dt','Тариф, ₽',10.4,2)+'</div>'+
+      '<div class="subhead">Ночь</div><div class="fields three">'+fld('z-el-np','Было',5030,1)+fld('z-el-nc','Стало',5090,1)+fld('z-el-nt','Тариф, ₽',3.9,2)+'</div></div>';
+  else if(s.kind==='qty') body='<div class="fields three">'+fld('z-'+s.id+'-q','Расход, '+s.qu,s.q,3)+fld('z-'+s.id+'-t','Тариф, '+s.tu,s.t,2)+'</div>';
+  else if(s.kind==='area'||s.kind==='people') body='<div class="fields three">'+fld('z-'+s.id+'-t','Тариф, '+s.tu,s.t,2)+'</div>';
+  else if(s.kind==='fixed') body='<div class="fields three">'+fld('z-'+s.id+'-sum','Сумма, ₽',s.sum,0)+'</div>';
+  return '<div class="svc" id="svc-'+s.id+'" style="--g:var('+GRP[s.grp].v+')">'+
+    '<div class="svc-head"><span class="svc-ic"><svg class="ico"><use href="#'+s.ic+'"/></svg></span>'+
+    '<label class="svc-name" for="z-'+s.id+'-on">'+s.name+(s.sub?'<small>'+s.sub+'</small>':'')+'</label>'+
+    '<span class="svc-sum" id="z-'+s.id+'-total"></span>'+
+    '<input type="checkbox" class="switch" id="z-'+s.id+'-on"'+(s.off?'':' checked')+' aria-label="Учитывать: '+s.name+'"></div>'+
+    '<div class="svc-body">'+body+'<div class="svc-foot" id="z-'+s.id+'-foot"></div></div></div>';
+}
+$('#z-meters').innerHTML=ZH.filter(s=>!s.fixed).map(svcHTML).join('');
+$('#z-fixed').innerHTML=ZH.filter(s=>s.fixed).map(svcHTML).join('');
+
+/* ───────── восстановление полей ───────── */
+Object.keys(saved).forEach(id=>{
+  if(id==='__state') return;
+  const el=document.getElementById(id); if(!el) return;
+  if(el.type==='checkbox') el.checked=!!saved[id];
+  else if(el.tagName==='SELECT'){ if(Array.from(el.options).some(o=>o.value===saved[id])) el.value=saved[id]; }
+  else el.value=saved[id];
+});
+function fmtInput(el){ if(el.value.trim()==='') return; const d=el.dataset.d!=null?+el.dataset.d:2; el.value=fmt(parse(el.value),d); }
+$$('input[data-d]').forEach(el=>{
+  el.setAttribute('inputmode','decimal'); el.setAttribute('autocomplete','off'); el.setAttribute('spellcheck','false');
+  fmtInput(el);
+  el.addEventListener('blur',()=>{ fmtInput(el); persist(); });
+  el.addEventListener('focus',()=>{ setTimeout(()=>{ try{ el.select(); }catch(e){} },0); });
+});
+
+/* ───────── нижняя панель ───────── */
+const dockData={}, visibleOut={};
+let current='ipoteka', heroGone=false;
+function updateDock(){
+  const dd=dockData[current]; if(!dd) return;
+  $('#dock-lbl').textContent=dd.lbl; $('#dock-val').textContent=dd.val;
+  $('#dock').classList.toggle('hide', !!visibleOut[current] || !heroGone);
+}
+if('IntersectionObserver' in window){
+  const io=new IntersectionObserver(es=>{ es.forEach(e=>{ visibleOut[e.target.dataset.out]=e.isIntersecting; }); updateDock(); },{threshold:0.08});
+  $$('.out').forEach(el=>io.observe(el));
+  const ho=new IntersectionObserver(es=>{ heroGone=!es[0].isIntersecting; updateDock(); },{threshold:0});
+  ho.observe($('.hero'));
+} else { heroGone=true; }
+$('#dock-go').addEventListener('click',()=>{ const el=$('#out-'+current); if(el) el.scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'start'}); });
+
+/* ───────── планировщик: не больше одного пересчёта на кадр ───────── */
+const dirty=new Set(); let rafId=0;
+function schedule(name){ dirty.add(name); if(!rafId) rafId=requestAnimationFrame(flush); }
+function flush(){ rafId=0; dirty.forEach(n=>{ if(n===current) RECALC[n](); }); dirty.clear(); }
+
+/* ═════════ ИПОТЕКА ═════════ */
+function simulate(L,n,r,type,extra){
+  const P=r>0?L*r/(1-Math.pow(1+r,-n)):L/n, D=L/n;
+  let bal=L,m=0,tInt=0,tPaid=0; const bals=[L],yrs=[]; let y={paid:0,int:0,prin:0};
+  while(bal>0.01&&m<n){
+    const int=bal*r; let prin=(type==='ann'?P-int:D)+extra; if(prin>bal) prin=bal;
+    const pay=prin+int; bal-=prin; if(bal<0.01) bal=0;
+    m++; tInt+=int; tPaid+=pay; y.paid+=pay; y.int+=int; y.prin+=prin; bals.push(bal);
+    if(m%12===0||bal===0||m===n){ yrs.push({year:Math.ceil(m/12),paid:y.paid,int:y.int,prin:y.prin,bal}); y={paid:0,int:0,prin:0}; }
+  }
+  return {P,D,months:m,tInt,tPaid,bals,yrs,first:type==='ann'?P:D+L*r,last:type==='ann'?P:D+D*r};
+}
+const mPrice=$('#m-price'),mPriceR=$('#m-price-r'),mDown=$('#m-down'),mDownR=$('#m-down-r'),mTerm=$('#m-term'),mTermR=$('#m-term-r'),mRate=$('#m-rate'),mRateR=$('#m-rate-r');
+function fillRange(r){ const mn=+r.min,mx=+r.max; r.style.setProperty('--p',((+r.value-mn)/(mx-mn)*100)+'%'); }
+function syncRanges(){
+  const p=val('m-price');
+  mPriceR.value=p; mDownR.value=p?Math.round(val('m-down')/p*100):0; mTermR.value=val('m-term'); mRateR.value=val('m-rate');
+  [mPriceR,mDownR,mTermR,mRateR].forEach(fillRange);
+}
+mPriceR.addEventListener('input',()=>{ mPrice.value=fmt(+mPriceR.value); syncRanges(); schedule('ipoteka'); persist(); });
+mDownR.addEventListener('input',()=>{ mDown.value=fmt(Math.round(val('m-price')*(+mDownR.value)/100/10000)*10000); fillRange(mDownR); schedule('ipoteka'); persist(); });
+mTermR.addEventListener('input',()=>{ mTerm.value=fmt(+mTermR.value); fillRange(mTermR); schedule('ipoteka'); persist(); });
+mRateR.addEventListener('input',()=>{ mRate.value=fmt(+mRateR.value,1); fillRange(mRateR); schedule('ipoteka'); persist(); });
+$$('.chip[data-rate]').forEach(c=>c.addEventListener('click',()=>{ mRate.value=fmt(parseFloat(c.dataset.rate),1); syncRanges(); schedule('ipoteka'); persist(); }));
+$$('[data-mtype]').forEach(b=>b.addEventListener('click',()=>{ state.mType=b.dataset.mtype; schedule('ipoteka'); persist(); }));
+
+let mLast='', mRows=[];
+function drawChart(a,b,n,L){
+  const svg=$('#m-chart');
+  const W=Math.max(300,Math.round(svg.getBoundingClientRect().width)||600);
+  const H=W<520?200:230, pl=56, pr=14, pt=14, pb=28, iw=W-pl-pr, ih=H-pt-pb;
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  const X=i=>pl+i/n*iw, Y=v=>pt+ih-(v/L)*ih;
+  const pts=arr=>{ const st=Math.max(1,Math.floor(arr.length/120)), o=[]; for(let i=0;i<arr.length;i+=st) o.push([X(i),Y(arr[i])]); const li=arr.length-1; if(li%st) o.push([X(li),Y(arr[li])]); return o; };
+  const path=p=>p.map((q,i)=>(i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1)).join('');
+  const main=b||a, pm=pts(main), y0=Y(0).toFixed(1);
+  let s='';
+  [.5,1].forEach(f=>{ const y=Y(L*f).toFixed(1); s+='<line class="gl" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y+'" y2="'+y+'"/><text class="ax" x="'+(pl-8)+'" y="'+(+y+4)+'" text-anchor="end">'+short(L*f)+'</text>'; });
+  s+='<text class="ax" x="'+(pl-8)+'" y="'+(+y0+4)+'" text-anchor="end">0</text>';
+  const yrs=n/12;
+  s+='<text class="ax" x="'+pl+'" y="'+(H-6)+'">сейчас</text>';
+  s+='<text class="ax" x="'+(W-pr)+'" y="'+(H-6)+'" text-anchor="end">'+fmt(yrs,1)+' '+(Number.isInteger(yrs)?plural(yrs,'год','года','лет'):'года')+'</text>';
+  s+='<path class="area" d="'+path(pm)+'L'+X(main.length-1).toFixed(1)+' '+y0+'L'+pl+' '+y0+'Z"/>';
+  if(b) s+='<path class="ln2" d="'+path(pts(a))+'"/>';
+  s+='<path class="ln" d="'+path(pm)+'"/><line class="axis" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y0+'" y2="'+y0+'"/>';
+  s+='<circle class="pt2" cx="'+pl+'" cy="'+Y(L).toFixed(1)+'" r="4.5"/>';
+  const ex=X(main.length-1);
+  s+='<circle class="pt" cx="'+ex.toFixed(1)+'" cy="'+y0+'" r="5.5"/>';
+  if(b){ const end=ex>W-120; s+='<text class="endt" x="'+(end?ex-10:ex).toFixed(1)+'" y="'+(+y0-12)+'" text-anchor="'+(end?'end':'middle')+'">закроете за '+fmtTerm(main.length-1)+'</text>'; }
+  svg.innerHTML=s;
+  $('#m-chart-leg').innerHTML=b?'<span><i></i>с доплатой</span><span><i class="d"></i>без неё</span>':'';
+}
+function renderTable(){
+  if(!$('#m-sched').open) return;
+  $('#m-table').innerHTML=mRows.map(y=>'<tr><td>'+y.year+'</td><td>'+fmt(y.paid)+'</td><td>'+fmt(y.int)+'</td><td>'+fmt(y.prin)+'</td><td>'+fmt(y.bal)+'</td></tr>').join('');
+}
+$('#m-sched').addEventListener('toggle',renderTable);
+
+function recalcM(){
+  const price=pos('m-price'); let down=pos('m-down'); if(down>price) down=price;
+  const years=Math.min(40,Math.max(1,val('m-term')||1)), rate=pos('m-rate'), extra=pos('m-extra');
+  const L=price-down, n=Math.round(years*12), r=rate/1200, pct=price>0?down/price*100:0;
+  $('#m-down-pct').textContent=fmt(pct,1)+'%';
+  $$('.chip[data-rate]').forEach(c=>c.setAttribute('aria-pressed',String(Math.abs(parseFloat(c.dataset.rate)-rate)<0.001)));
+  $$('[data-mtype]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mtype===state.mType)));
+  $('#m-type-hint').textContent=state.mType==='ann'
+    ?'Одинаковый платёж весь срок. Так считает большинство банков.'
+    :'Первые платежи выше, потом они уменьшаются. Переплата получается меньше.';
+  $('#m-warn').hidden=!(rate<=6&&pct<20&&L>0);
+  $('#m-lbl').textContent=state.mType==='ann'?'Платёж в месяц':'Первый платёж';
+  if(L<=0){
+    tween($('#m-pay'),0); $('#m-say').textContent='Взнос покрывает всю стоимость, кредит не нужен.';
+    tiles($('#m-tiles'),[]); $('#m-bar').innerHTML=''; $('#m-legend').innerHTML=''; $('#m-chart').innerHTML=''; $('#m-chart-leg').innerHTML=''; mRows=[]; renderTable();
+    dockData.ipoteka={lbl:'Платёж в месяц',val:'0 ₽'}; $('#peek-m').textContent='0 ₽'; mLast=''; updateDock(); return;
+  }
+  const base=simulate(L,n,r,state.mType,0), ex=extra>0?simulate(L,n,r,state.mType,extra):null, cur=ex||base;
+  tween($('#m-pay'),Math.round(base.first));
+  let say=state.mType==='ann'
+    ?'Столько вы будете платить каждый месяц '+fmtTerm(n)+'. '
+    :'Дальше платёж уменьшается, последний будет <b>'+rub(base.last)+'</b>. ';
+  say+='Банку отдадите '+money(cur.tPaid)+', из них проценты: <b>'+money(cur.tInt)+'</b>.';
+  if(ex) say+=' С доплатой '+rub(extra)+' кредит закроется за '+fmtTerm(ex.months)+' и вы сэкономите <b>'+money(base.tInt-ex.tInt)+'</b>.';
+  $('#m-say').innerHTML=say;
+  tiles($('#m-tiles'),[
+    ['Сумма кредита',money(L)],
+    ['Переплата',money(cur.tInt),'warm'],
+    ['Срок',fmtTerm(cur.months),ex?'good':''],
+    ['Нужен доход от',rub(base.first/0.4)],
+  ]);
+  const pI=cur.tInt/(L+cur.tInt)*100;
+  $('#m-bar').innerHTML='<i style="--g:var(--c1);flex-grow:'+(100-pI)+'"></i><i style="--g:var(--c2);flex-grow:'+pI+'"></i>';
+  $('#m-legend').innerHTML='<span><i class="dot" style="--g:var(--c1)"></i>Сам кредит<b>'+fmt(100-pI)+'%</b></span><span><i class="dot" style="--g:var(--c2)"></i>Проценты банку<b>'+fmt(pI)+'%</b></span>';
+  drawChart(base.bals,ex?ex.bals:null,n,L);
+  mRows=cur.yrs; renderTable();
+  dockData.ipoteka={lbl:state.mType==='ann'?'Платёж в месяц':'Первый платёж',val:rub(base.first)};
+  $('#peek-m').textContent=rub(base.first)+' в мес.';
+  mLast=['Ипотека — расчёт на Домосчёте','Стоимость: '+rub(price),'Взнос: '+rub(down)+' ('+fmt(pct,1)+'%)','Кредит: '+rub(L),'Ставка: '+fmt(rate,2)+'%, срок '+fmtTerm(n),
+    (state.mType==='ann'?'Платёж: ':'Первый платёж: ')+rub(base.first)+(ex?' + '+rub(extra)+' досрочно':''),'Переплата: '+rub(cur.tInt),'Всего банку: '+rub(cur.tPaid)]
+    .concat(ex?['С доплатой: '+fmtTerm(ex.months)+', экономия '+rub(base.tInt-ex.tInt)]:[]).join('\n');
+  updateDock();
+}
+$('#m-copy').addEventListener('click',()=>{ if(mLast) copyText(mLast,$('#m-status')); });
+
+/* ═════════ МАТЕРИАЛЫ ═════════ */
+const BLOCKS={
+  gb300:{name:'Газоблок 600×250×300',l:.6,h:.25,w:.3,s:.003,price:330},
+  gb200:{name:'Газоблок 600×250×200',l:.6,h:.25,w:.2,s:.003,price:230},
+  gb400:{name:'Газоблок 600×250×400',l:.6,h:.25,w:.4,s:.003,price:440},
+  brick1:{name:'Кирпич одинарный',l:.25,h:.065,w:.12,s:.01,price:25,brick:true},
+  brick15:{name:'Кирпич полуторный',l:.25,h:.088,w:.12,s:.01,price:32,brick:true},
+};
+const BRICK_T={'0.5':.12,'1':.25,'1.5':.38,'2':.51};
+const SURF={walls:'стены',ceil:'потолок',both:'стены и потолок',floor:'пол',custom:'своя площадь'};
+function room(){
+  const L=pos('r-l'),W=pos('r-w'),H=pos('r-h'),wc=Math.round(pos('r-wc')),ww=pos('r-ww'),wh=pos('r-wh'),dc=Math.round(pos('r-dc')),dw=pos('r-dw'),dh=pos('r-dh');
+  const floor=L*W, perim=2*(L+W), open=wc*ww*wh+dc*dw*dh;
+  return {L,W,H,wc,ww,wh,dc,dw,dh,floor,perim,walls:Math.max(0,perim*H-open)};
+}
+function surfArea(R,s){ return s==='walls'?R.walls:(s==='ceil'||s==='floor')?R.floor:R.walls+R.floor; }
+const MATS={
+  oboi:{title:'Обои',room:true,calc(R){
+    const rw=val('o-rw'),rl=pos('o-rl'),rap=pos('o-rap')/100,price=pos('o-price'),res=$('#o-res').checked;
+    if(!(R.H>0&&R.perim>0)) return {error:'Укажите размеры комнаты.'};
+    if(!(rw>0&&rl>0)) return {error:'Укажите размеры рулона.'};
+    const width=Math.max(0,R.perim-R.dc*R.dw-R.wc*R.ww), stripLen=R.H+rap+0.05, per=Math.floor(rl/stripLen);
+    if(per<1) return {error:'Рулон короче высоты стены. Выберите рулон длиннее.'};
+    const strips=ceil(width/rw), rolls=ceil(strips/per)+(res&&strips>0?1:0), cost=rolls*price;
+    return {main:rolls,unit:plural(rolls,'рулон','рулона','рулонов'),cost,
+      say:'Обои шириной '+fmt(rw,2)+' м: нарежете '+strips+' '+plural(strips,'полосу','полосы','полос')+' по '+fmt(stripLen,2)+' м, из рулона выходит '+per+'.'+(res?' Один рулон в запас.':''),
+      tiles:[['Стоимость',rub(cost),'warm'],['Площадь стен',fmt(R.walls,1)+' м²']],
+      lines:[['Ширина стен под оклейку',fmt(width,2)+' м','','периметр без окон и дверей'],['Полос',String(strips)],['Полос из одного рулона',String(per),'','высота + раппорт + 5 см на подрезку'],res?['Из них запасной','1 рулон']:null,['Стоимость',rub(cost),'strong']],
+      item:{name:'Обои '+fmt(rw,2)+'×'+fmt(rl,2)+' м',qty:rolls+' '+plural(rolls,'рулон','рулона','рулонов')+' × '+rub(price)}};
+  }},
+  kraska:{title:'Краска',room:true,calc(R){
+    const s=$('#k-surf').value,area=surfArea(R,s),layers=Math.max(1,Math.round(pos('k-layers'))),rate=pos('k-rate'),can=pos('k-can'),price=pos('k-price');
+    if(!(can>0)) return {error:'Укажите объём банки.'};
+    const liters=area*layers*rate,cans=ceil(liters/can),cost=cans*price;
+    return {main:cans,unit:plural(cans,'банка','банки','банок'),cost,
+      say:'На '+SURF[s]+' площадью '+fmt(area,1)+' м² в '+layers+' '+plural(layers,'слой','слоя','слоёв')+' уйдёт около '+fmt(liters,1)+' л краски.',
+      tiles:[['Стоимость',rub(cost),'warm'],['Грунтовка','≈ '+fmt(area*0.15,1)+' л']],
+      lines:[['Площадь окраски',fmt(area,2)+' м²','',SURF[s]],['Краски нужно',fmt(liters,1)+' л'],['Банок по '+fmt(can,2)+' л',String(cans)],['Грунтовка в 1 слой','≈ '+fmt(area*0.15,1)+' л','','из расчёта 0,15 л/м²'],['Стоимость краски',rub(cost),'strong']],
+      item:{name:'Краска: '+SURF[s]+', '+layers+' '+plural(layers,'слой','слоя','слоёв'),qty:cans+' '+plural(cans,'банка','банки','банок')+' по '+fmt(can,2)+' л'}};
+  }},
+  plitka:{title:'Плитка',room:true,calc(R){
+    const s=$('#p-surf').value,area=s==='custom'?pos('p-area'):surfArea(R,s);
+    const tl=pos('p-tl'),tw=pos('p-tw'),lay=parseFloat($('#p-lay').value),box=pos('p-box'),price=pos('p-price'),joint=pos('p-joint'),glue=pos('p-glue'),th=8;
+    if(!(tl>0&&tw>0)) return {error:'Укажите размер плитки.'};
+    const need=area*(1+lay),pcs=ceil(need/(tl*tw/1e4)),boxes=box>0?ceil(need/box):0,buy=box>0?boxes*box:need,cost=buy*price;
+    const glueKg=area*glue,bags=ceil(glueKg/25),a=tl*10,b=tw*10,grout=area*((a+b)/(a*b))*th*joint*1.6,groutKg=Math.max(0.5,Math.ceil(grout*1.1*2)/2);
+    return {main:box>0?boxes:Math.round(need*100)/100,md:box>0?0:2,unit:box>0?plural(boxes,'коробка','коробки','коробок'):'м²',cost,
+      say:'Это '+fmt(buy,2)+' м², '+pcs+' '+plural(pcs,'плитка','плитки','плиток')+' '+fmt(tl,1)+'×'+fmt(tw,1)+' см с запасом '+fmt(lay*100)+'% на подрезку.',
+      tiles:[['Стоимость плитки',rub(cost),'warm'],['Клей',bags+' '+plural(bags,'мешок','мешка','мешков')+' по 25 кг']],
+      lines:[['Площадь укладки',fmt(area,2)+' м²','',SURF[s]],['С запасом',fmt(need,2)+' м²'],['Плиток',fmt(pcs)+' шт.'],box>0?['Коробок по '+fmt(box,3)+' м²',String(boxes)]:null,['Клей',fmt(glueKg)+' кг','',bags+' '+plural(bags,'мешок','мешка','мешков')+' по 25 кг'],['Затирка','≈ '+fmt(groutKg,1)+' кг','','шов '+fmt(joint,1)+' мм, запас 10%'],['Стоимость плитки',rub(cost),'strong']],
+      item:{name:'Плитка '+fmt(tl,1)+'×'+fmt(tw,1)+' см: '+SURF[s],qty:(box>0?boxes+' кор., ':'')+fmt(buy,2)+' м² × '+rub(price)}};
+  }},
+  laminat:{title:'Ламинат',room:true,calc(R){
+    const area=R.floor,bl=pos('l-bl'),bw=pos('l-bw'),pc=pos('l-pc'),lay=parseFloat($('#l-lay').value),price=pos('l-price'),pl=pos('l-pl'),plp=pos('l-plp');
+    const packA=bl*bw*pc/1e6;
+    if(!(packA>0)) return {error:'Укажите размер доски и количество в упаковке.'};
+    if(!(area>0)) return {error:'Укажите длину и ширину комнаты.'};
+    const need=area*(1+lay),packs=ceil(need/packA),plLen=Math.max(0,R.perim-R.dc*R.dw)*1.05,plN=pl>0?ceil(plLen/pl):0,cLam=packs*price,cPl=plN*plp,cost=cLam+cPl;
+    return {main:packs,unit:plural(packs,'упаковка','упаковки','упаковок'),cost,
+      say:'Это '+fmt(packs*packA,2)+' м² ламината на пол '+fmt(area,1)+' м². Плинтуса нужно '+plN+' '+plural(plN,'штука','штуки','штук')+' по '+fmt(pl,2)+' м.',
+      tiles:[['Всего с плинтусом',rub(cost),'warm'],['Подложка','≈ '+fmt(area*1.05,1)+' м²']],
+      lines:[['Площадь пола',fmt(area,2)+' м²'],['В одной упаковке',fmt(packA,3)+' м²'],['С запасом',fmt(need,2)+' м²','','+'+fmt(lay*100)+'% на подрезку'],['Плинтус',plN+' шт.','',fmt(plLen,1)+' м с запасом 5%'],['Ламинат',rub(cLam)],['Плинтус',rub(cPl)],['Итого',rub(cost),'strong']],
+      item:{name:'Ламинат '+fmt(bl)+'×'+fmt(bw)+' мм и плинтус',qty:packs+' уп. + '+plN+' плинт.'}};
+  }},
+  shtuk:{title:'Штукатурка',room:true,calc(R){
+    const s=$('#s-surf').value,area=surfArea(R,s),th=pos('s-thick'),rate=pos('s-rate'),bag=pos('s-bag'),price=pos('s-price'),tname=$('#s-type').selectedOptions[0].textContent;
+    if(!(bag>0)) return {error:'Укажите вес мешка.'};
+    const kg=area*th*rate,bags=ceil(kg/bag),cost=bags*price;
+    return {main:bags,unit:plural(bags,'мешок','мешка','мешков'),cost,
+      say:tname+' смесь на '+SURF[s]+' '+fmt(area,1)+' м² слоем '+fmt(th,1)+' мм: около '+fmt(kg)+' кг.',
+      tiles:[['Стоимость',rub(cost),'warm'],['Сухой смеси',fmt(kg)+' кг']],
+      lines:[['Площадь',fmt(area,2)+' м²','',SURF[s]],['Средний слой',fmt(th,1)+' мм'],['Сухой смеси',fmt(kg)+' кг','',fmt(rate,2)+' кг/м² на 1 мм'],['Мешков по '+fmt(bag)+' кг',String(bags)],['Стоимость',rub(cost),'strong']],
+      item:{name:tname+': '+SURF[s]+', '+fmt(th,1)+' мм',qty:bags+' '+plural(bags,'мешок','мешка','мешков')+' по '+fmt(bag)+' кг'}};
+  }},
+  kladka:{title:'Кладка стен',room:false,calc(){
+    const b=BLOCKS[$('#b-type').value],len=pos('b-len'),h=pos('b-h'),open=pos('b-open'),price=pos('b-price'),area=Math.max(0,len*h-open);
+    if(!(area>0)) return {error:'Укажите длину и высоту стен.'};
+    let pcs,t,extra,thName='';
+    if(b.brick){
+      const k=$('#b-th').value; t=BRICK_T[k]; thName=$('#b-th').selectedOptions[0].textContent.split(',')[0].toLowerCase();
+      pcs=area*(parseFloat(k)*2)/((b.l+b.s)*(b.h+b.s));
+      const mortar=Math.max(0,area*t-pcs*b.l*b.h*b.w);
+      extra=['Раствор','≈ '+fmt(mortar,2)+' м³','шов 10 мм'];
+    } else {
+      t=b.w; pcs=area/((b.l+b.s)*(b.h+b.s));
+      const gb=ceil(area*t*20/25);
+      extra=['Клей',gb+' '+plural(gb,'мешок','мешка','мешков')+' по 25 кг','≈ 20 кг на 1 м³'];
+    }
+    const pcsR=ceil(pcs*1.05),cost=pcsR*price;
+    return {main:pcsR,unit:'шт.',cost,
+      say:b.name+(thName?', '+thName:'')+'. Стена '+fmt(area,1)+' м² толщиной '+fmt(t*1000)+' мм, с запасом 5% на бой.',
+      tiles:[['Стоимость',rub(cost),'warm'],[extra[0],extra[1]]],
+      lines:[['Площадь стен',fmt(area,2)+' м²','','без окон и дверей'],['Объём кладки',fmt(area*t,2)+' м³'],['Без запаса',fmt(ceil(pcs))+' шт.'],['С запасом 5%',fmt(pcsR)+' шт.'],[extra[0],extra[1],'',extra[2]],['Стоимость',rub(cost),'strong']],
+      item:{name:b.name+(thName?', '+thName:''),qty:fmt(pcsR)+' шт. × '+rub(price)}};
+  }},
+  beton:{title:'Бетон и стяжка',room:false,calc(){
+    const type=$('#c-type').value;
+    if(type==='styazhka'){
+      const area=pos('c-sa'),th=pos('c-st'),rate=pos('c-sr'),bag=pos('c-sb'),price=pos('c-sp');
+      if(!(bag>0)) return {error:'Укажите вес мешка.'};
+      const kg=area*th*rate,bags=ceil(kg/bag),cost=bags*price;
+      return {main:bags,unit:plural(bags,'мешок','мешка','мешков'),cost,
+        say:'Стяжка '+fmt(th)+' мм на '+fmt(area,1)+' м²: около '+fmt(kg)+' кг сухой смеси.',
+        tiles:[['Стоимость',rub(cost),'warm'],['Раствора',fmt(area*th/1000,2)+' м³']],
+        lines:[['Площадь',fmt(area,2)+' м²'],['Толщина',fmt(th)+' мм'],['Сухой смеси',fmt(kg)+' кг'],['Мешков по '+fmt(bag)+' кг',String(bags)],['Стоимость',rub(cost),'strong']],
+        item:{name:'Стяжка '+fmt(th)+' мм, '+fmt(area,1)+' м²',qty:bags+' '+plural(bags,'мешок','мешка','мешков')+' по '+fmt(bag)+' кг'}};
+    }
+    const V=type==='lenta'?pos('c-len')*pos('c-w')*pos('c-h'):pos('c-pl')*pos('c-pw')*pos('c-pt');
+    if(!(V>0)) return {error:'Укажите размеры.'};
+    const Vr=Math.ceil(V*1.05*10)/10,mix=pos('c-mix'),trips=mix>0?ceil(Vr/mix):0,price=pos('c-price'),cost=Vr*price;
+    const nm=type==='lenta'?'Бетон на ленточный фундамент':'Бетон на плиту';
+    return {main:Vr,md:1,unit:'м³',cost,
+      say:'По размерам выходит '+fmt(V,2)+' м³, заказывайте с запасом 5%.'+(trips?' Привезут '+trips+' '+plural(trips,'миксер','миксера','миксеров')+'.':''),
+      tiles:[['Стоимость',rub(cost),'warm'],['Миксеров',trips?String(trips):'—']],
+      lines:[['Объём по размерам',fmt(V,2)+' м³'],['С запасом 5%',fmt(Vr,1)+' м³'],trips?['Миксеров по '+fmt(mix,1)+' м³',String(trips)]:null,['Стоимость',rub(cost),'strong']],
+      item:{name:nm,qty:fmt(Vr,1)+' м³ × '+rub(price)}};
+  }},
+};
+
+function drawPlan(R){
+  const svg=$('#plan');
+  if(!(R.L>0&&R.W>0)){ svg.innerHTML='<text class="sub" x="170" y="120" text-anchor="middle">Укажите длину и ширину</text>'; return; }
+  const ox=62,oy=40,mw=250,mh=150,sc=Math.min(mw/R.L,mh/R.W),w=R.L*sc,h=R.W*sc,x0=ox+(mw-w)/2,y0=oy+(mh-h)/2,x1=x0+w,y1=y0+h,f=v=>v.toFixed(1);
+  let s='<rect class="floor" x="'+f(x0)+'" y="'+f(y0)+'" width="'+f(w)+'" height="'+f(h)+'" rx="3"/>';
+  for(let yy=y0+14;yy<y1-4;yy+=14) s+='<line class="plank" x1="'+f(x0+3)+'" x2="'+f(x1-3)+'" y1="'+f(yy)+'" y2="'+f(yy)+'"/>';
+  s+='<rect class="wall" x="'+f(x0)+'" y="'+f(y0)+'" width="'+f(w)+'" height="'+f(h)+'" rx="3"/>';
+  const nw=Math.min(R.wc,8);
+  if(nw>0){ const ww=Math.min(R.ww*sc,w/nw*0.8); for(let i=0;i<nw;i++){ const cx=x0+w*(i+1)/(nw+1),a=cx-ww/2,b=cx+ww/2; s+='<line class="gap" x1="'+f(a)+'" x2="'+f(b)+'" y1="'+f(y0)+'" y2="'+f(y0)+'"/><line class="win" x1="'+f(a+1)+'" x2="'+f(b-1)+'" y1="'+f(y0)+'" y2="'+f(y0)+'"/>'; } }
+  const nd=Math.min(R.dc,6);
+  if(nd>0){ const dw=Math.min(R.dw*sc,w/nd*0.7,h*0.9); for(let i=0;i<nd;i++){ const cx=x0+w*(i+1)/(nd+1),a=cx-dw/2,b=cx+dw/2; s+='<line class="gap" x1="'+f(a)+'" x2="'+f(b)+'" y1="'+f(y1)+'" y2="'+f(y1)+'"/><path class="door" d="M'+f(a)+' '+f(y1)+'L'+f(a)+' '+f(y1-dw)+'A'+f(dw)+' '+f(dw)+' 0 0 1 '+f(b)+' '+f(y1)+'"/>'; } }
+  const dy=y0-20, dx=x0-22;
+  s+='<line class="dim" x1="'+f(x0)+'" x2="'+f(x1)+'" y1="'+f(dy)+'" y2="'+f(dy)+'"/><line class="dim" x1="'+f(x0)+'" x2="'+f(x0)+'" y1="'+f(dy-4)+'" y2="'+f(dy+4)+'"/><line class="dim" x1="'+f(x1)+'" x2="'+f(x1)+'" y1="'+f(dy-4)+'" y2="'+f(dy+4)+'"/>';
+  s+='<rect class="pill" x="'+f((x0+x1)/2-30)+'" y="'+f(dy-11)+'" width="60" height="22" rx="11"/><text class="dimt" x="'+f((x0+x1)/2)+'" y="'+f(dy+4)+'" text-anchor="middle">'+fmt(R.L,2)+' м</text>';
+  s+='<line class="dim" x1="'+f(dx)+'" x2="'+f(dx)+'" y1="'+f(y0)+'" y2="'+f(y1)+'"/><line class="dim" x1="'+f(dx-4)+'" x2="'+f(dx+4)+'" y1="'+f(y0)+'" y2="'+f(y0)+'"/><line class="dim" x1="'+f(dx-4)+'" x2="'+f(dx+4)+'" y1="'+f(y1)+'" y2="'+f(y1)+'"/>';
+  s+='<g transform="translate('+f(dx)+' '+f((y0+y1)/2)+') rotate(-90)"><rect class="pill" x="-30" y="-11" width="60" height="22" rx="11"/><text class="dimt" x="0" y="4" text-anchor="middle">'+fmt(R.W,2)+' м</text></g>';
+  if(h>46&&w>96){ const cy=(y0+y1)/2; s+='<text class="area" x="'+f((x0+x1)/2)+'" y="'+f(cy+2)+'" text-anchor="middle">'+fmt(R.floor,2)+' м²</text><text class="sub" x="'+f((x0+x1)/2)+'" y="'+f(cy+19)+'" text-anchor="middle">потолок '+fmt(R.H,2)+' м</text>'; }
+  svg.innerHTML=s;
+}
+
+let matLast=null;
+function recalcMat(){
+  const def=MATS[state.mat]||MATS.oboi;
+  $$('#mpick [data-mat]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mat===state.mat)));
+  $$('.mat').forEach(m=>{ m.hidden=m.dataset.mat!==state.mat; });
+  $('#room').hidden=!def.room;
+  $('#mat-no').textContent=def.room?'3':'2';
+  $('#mat-title').textContent=def.title;
+  $('#p-area-f').hidden=$('#p-surf').value!=='custom';
+  $('#b-th-f').hidden=!BLOCKS[$('#b-type').value].brick;
+  const ct=$('#c-type').value;
+  $$('[data-ctype]').forEach(el=>{ el.hidden=!el.dataset.ctype.split(' ').includes(ct); });
+  const R=room();
+  if(def.room){
+    drawPlan(R);
+    $('#room-facts').innerHTML='<div><span>Пол</span><b>'+fmt(R.floor,2)+' м²</b></div><div><span>Периметр</span><b>'+fmt(R.perim,2)+' м</b></div><div><span>Стены</span><b>'+fmt(R.walls,2)+' м²</b></div>';
+  }
+  const out=def.calc(R);
+  $('#mat-lbl').textContent=def.title+': нужно купить';
+  if(out.error){
+    $('#mat-main')._v=null; $('#mat-main').textContent='—'; $('#mat-unit').textContent=''; $('#mat-say').textContent=out.error;
+    tiles($('#mat-tiles'),[]); list($('#mat-list'),[]); $('#mat-add').disabled=true; matLast=null; dockData.materialy={lbl:def.title,val:'—'};
+  } else {
+    tween($('#mat-main'),out.main,out.md||0); $('#mat-unit').textContent=out.unit; $('#mat-say').textContent=out.say;
+    tiles($('#mat-tiles'),out.tiles); list($('#mat-list'),out.lines); $('#mat-add').disabled=false; matLast=out;
+    dockData.materialy={lbl:def.title,val:fmt(out.main,out.md||0)+' '+out.unit+' · '+rub(out.cost)};
+  }
+  updateDock();
+}
+$$('#mpick [data-mat]').forEach(b=>b.addEventListener('click',()=>{ if(state.mat===b.dataset.mat) return; state.mat=b.dataset.mat; recalcMat(); persist(); }));
+$('#s-type').addEventListener('change',()=>{ const o=$('#s-type').selectedOptions[0]; $('#s-rate').value=fmt(+o.dataset.rate,2); $('#s-bag').value=fmt(+o.dataset.bag); $('#s-price').value=fmt(+o.dataset.price); $('#s-thick').value=fmt(+o.dataset.thick,1); });
+$('#b-type').addEventListener('change',()=>{ $('#b-price').value=fmt(BLOCKS[$('#b-type').value].price,2); });
+
+let smeta=load(SKEY,[]); if(!Array.isArray(smeta)) smeta=[];
+function renderSmeta(){
+  $('#smeta-list').innerHTML=smeta.length
+    ?smeta.map((it,i)=>'<li><div class="si-main"><span class="si-name">'+esc(it.name)+'</span><span class="si-qty">'+esc(it.qty)+'</span></div><span class="si-sum">'+rub(it.sum)+'</span><button type="button" class="si-del" data-i="'+i+'" aria-label="Убрать из сметы: '+esc(it.name)+'"><svg class="ico"><use href="#i-x"/></svg></button></li>').join('')
+    :'<li class="empty">Пока пусто. Посчитайте материал и нажмите «Добавить в смету».</li>';
+  $('#smeta-sum').textContent=rub(smeta.reduce((a,b)=>a+(+b.sum||0),0));
+  store(SKEY,smeta);
+}
+$('#mat-add').addEventListener('click',()=>{
+  if(!matLast) return;
+  const it={name:matLast.item.name,qty:matLast.item.qty,sum:Math.round(matLast.cost)}, i=smeta.findIndex(x=>x.name===it.name);
+  if(i>=0){ smeta[i]=it; flash($('#mat-status'),'Обновлено в смете'); } else { smeta.push(it); flash($('#mat-status'),'Добавлено в смету'); }
+  renderSmeta();
+});
+$('#smeta-list').addEventListener('click',e=>{ const b=e.target.closest('.si-del'); if(!b) return; smeta.splice(+b.dataset.i,1); renderSmeta(); });
+$('#smeta-copy').addEventListener('click',()=>{
+  if(!smeta.length){ flash($('#smeta-status'),'Смета пустая',true); return; }
+  copyText(['Смета на материалы — Домосчёт'].concat(smeta.map((it,i)=>(i+1)+'. '+it.name+' — '+it.qty+' — '+rub(it.sum)),['Итого: '+rub(smeta.reduce((a,b)=>a+b.sum,0))]).join('\n'),$('#smeta-status'));
+});
+let clearArm=null;
+$('#smeta-clear').addEventListener('click',()=>{
+  const btn=$('#smeta-clear'); if(!smeta.length) return;
+  if(!clearArm){ btn.textContent='Точно очистить?'; clearArm=setTimeout(()=>{ btn.textContent='Очистить'; clearArm=null; },3000); return; }
+  clearTimeout(clearArm); clearArm=null; btn.textContent='Очистить'; smeta=[]; renderSmeta(); flash($('#smeta-status'),'Смета очищена');
+});
+
+/* ═════════ ЖКХ ═════════ */
+$$('[data-elmode]').forEach(b=>b.addEventListener('click',()=>{ state.elMode=b.dataset.elmode; schedule('zhkh'); persist(); }));
+let zLast='';
+function recalcZ(){
+  const area=pos('z-area'),ppl=pos('z-people');
+  $$('[data-elmode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.elmode===state.elMode)));
+  $('#z-el-one').hidden=state.elMode!=='one'; $('#z-el-two').hidden=state.elMode==='one';
+  const g={water:0,energy:0,house:0},rows=[]; let total=0,water=0;
+  const BAD='Показания «стало» меньше, чем «было». Проверьте цифры.';
+  ZH.forEach(s=>{
+    const on=$('#z-'+s.id+'-on').checked; $('#svc-'+s.id).classList.toggle('off',!on);
+    let sum=0,det='',foot='',warn=false;
+    const meter=(p,c,t,u,dd)=>{ const diff=c-p; if(diff<0) warn=true; const uu=Math.max(0,diff); return {uu,s:uu*t,det:fmt(uu,dd)+' '+u+' × '+fmt(t,2)+' ₽'}; };
+    if(s.kind==='meter'){
+      const m=meter(val('z-'+s.id+'-prev'),val('z-'+s.id+'-cur'),val('z-'+s.id+'-t'),s.u,3);
+      sum=m.s; det=m.det; foot=warn?BAD:'Расход за месяц: '+fmt(m.uu,3)+' '+s.u;
+      if(on&&(s.id==='cold'||s.id==='hot')) water+=m.uu;
+    } else if(s.kind==='drain'){
+      const t=val('z-drain-t'); sum=water*t; det=fmt(water,3)+' м³ × '+fmt(t,2)+' ₽'; foot='Холодная + горячая вода: '+fmt(water,3)+' м³';
+    } else if(s.kind==='el'){
+      if(state.elMode==='one'){ const m=meter(val('z-el-prev'),val('z-el-cur'),val('z-el-t'),'кВт·ч',1); sum=m.s; det=m.det; foot='Расход за месяц: '+fmt(m.uu,1)+' кВт·ч'; }
+      else { const a=meter(val('z-el-dp'),val('z-el-dc'),val('z-el-dt'),'кВт·ч',1), b=meter(val('z-el-np'),val('z-el-nc'),val('z-el-nt'),'кВт·ч',1); sum=a.s+b.s; det='день '+fmt(a.uu,1)+' + ночь '+fmt(b.uu,1)+' кВт·ч'; foot='Расход за месяц: '+fmt(a.uu+b.uu,1)+' кВт·ч'; }
+      if(warn) foot=BAD;
+    } else if(s.kind==='qty'){
+      const q=pos('z-'+s.id+'-q'),t=val('z-'+s.id+'-t'); sum=q*t; det=fmt(q,3)+' '+s.qu+' × '+fmt(t,2)+' ₽'; foot='Гкал смотрите в квитанции: зимой больше, летом обычно 0';
+    } else if(s.kind==='area'){
+      const t=val('z-'+s.id+'-t'); sum=area*t; det=fmt(area,1)+' м² × '+fmt(t,2)+' ₽';
+    } else if(s.kind==='people'){
+      const t=val('z-'+s.id+'-t'); sum=ppl*t; det=fmt(ppl)+' чел. × '+fmt(t,2)+' ₽';
+    } else if(s.kind==='fixed'){ sum=pos('z-'+s.id+'-sum'); det='фиксированная сумма'; }
+    $('#z-'+s.id+'-total').textContent=on?rub(sum):'выключено';
+    const fe=$('#z-'+s.id+'-foot'); fe.textContent=foot; fe.classList.toggle('warn',warn); fe.hidden=!foot;
+    if(on){ total+=sum; g[s.grp]+=sum; rows.push([s,sum,det]); }
+  });
+  tween($('#z-total'),Math.round(total));
+  const top=rows.slice().sort((a,b)=>b[1]-a[1])[0];
+  $('#z-say').innerHTML=top&&total>0
+    ?'Больше всего уходит на '+top[0].name.toLowerCase()+': <b>'+rub(top[1])+'</b>, это '+fmt(top[1]/total*100)+'% квитанции.'
+    :'Включите хотя бы одну услугу.';
+  tiles($('#z-tiles'),Object.keys(g).map(k=>[GRP[k].name,rub(g[k])]).concat([['В год, если так каждый месяц','≈ '+money(total*12)]]));
+  $('#z-bar').innerHTML=total>0?Object.keys(g).filter(k=>g[k]>0).map(k=>'<i style="--g:var('+GRP[k].v+');flex-grow:'+(g[k]/total*100)+'"></i>').join(''):'';
+  $('#z-legend').innerHTML=Object.keys(g).map(k=>'<span><i class="dot" style="--g:var('+GRP[k].v+')"></i>'+GRP[k].name+'<b>'+(total>0?fmt(g[k]/total*100):0)+'%</b></span>').join('');
+  list($('#z-list'),rows.map(r=>['<i class="dot" style="--g:var('+GRP[r[0].grp].v+')"></i>'+r[0].name,rub(r[1]),'',r[2]]).concat([['Итого',rub(total),'strong']]));
+  const gr=val('z-grow');
+  $('#z-fore').innerHTML='<b>'+rub(total*(1+gr/100))+'</b> в месяц, на '+rub(Math.abs(total*gr/100))+(gr>=0?' больше':' меньше');
+  dockData.zhkh={lbl:'Коммуналка за месяц',val:rub(total)};
+  $('#peek-z').textContent=rub(total);
+  zLast=['Коммуналка за месяц — Домосчёт'].concat(rows.map(r=>r[0].name+': '+r[2]+' = '+rub(r[1])),['Итого: '+rub(total)]).join('\n');
+  updateDock();
+}
+$('#z-copy').addEventListener('click',()=>copyText(zLast,$('#z-status')));
+
+/* ═════════ события ввода ═════════ */
+const RECALC={ipoteka:()=>{ syncRanges(); recalcM(); },materialy:recalcMat,zhkh:recalcZ};
+const SEC={'sheet-ipoteka':'ipoteka','sheet-materialy':'materialy','sheet-zhkh':'zhkh'};
+['input','change'].forEach(ev=>document.addEventListener(ev,e=>{
+  const t=e.target; if(!(t instanceof Element)||t.type==='range'||!t.matches('input,select')) return;
+  const sec=t.closest('.sheet'); if(!sec) return;
+  schedule(SEC[sec.id]); persist();
+}));
+
+/* ═════════ вкладки ═════════ */
+const TABS=['ipoteka','materialy','zhkh'];
+function showTab(name,animate){
+  if(!TABS.includes(name)) name='ipoteka';
+  const changed=name!==current; current=name;
+  TABS.forEach(t=>{ const s=$('#sheet-'+t); s.hidden=t!==name; const a=$('#tab-'+t); a.setAttribute('aria-selected',String(t===name)); a.tabIndex=t===name?0:-1; });
+  $('#tabs').style.setProperty('--i',TABS.indexOf(name));
+  RECALC[name]();
+  if(animate&&changed&&!reduceMotion){ const s=$('#sheet-'+name); s.classList.remove('enter'); void s.offsetWidth; s.classList.add('enter'); }
+  updateDock();
+}
+function go(name,jump){
+  const nav=$('.tabs-wrap'), navTop=nav.offsetTop;
+  showTab(name,true);
+  try{ if(location.hash.slice(1)!==name) location.hash=name; }catch(e){}
+  if(jump) window.scrollTo({top:navTop,behavior:reduceMotion?'auto':'smooth'});
+  else if(window.scrollY>navTop) window.scrollTo({top:navTop,behavior:'instant'});
+}
+$$('[data-go]').forEach(el=>el.addEventListener('click',e=>{ e.preventDefault(); go(el.dataset.go,true); }));
+$$('#tabs [role=tab]').forEach(a=>a.addEventListener('click',e=>{ e.preventDefault(); go(a.id.replace('tab-','')); }));
+$('#tabs').addEventListener('keydown',e=>{
+  if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft') return;
+  const i=TABS.indexOf(current),n=TABS[(i+(e.key==='ArrowRight'?1:TABS.length-1))%TABS.length];
+  go(n); $('#tab-'+n).focus(); e.preventDefault();
+});
+window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(TABS.includes(h)&&h!==current) showTab(h,true); });
+let rT=null;
+window.addEventListener('resize',()=>{ clearTimeout(rT); rT=setTimeout(()=>{ if(current==='ipoteka') recalcM(); },160); },{passive:true});
+
+/* старт */
+renderSmeta();
+recalcM(); recalcZ();
+const h0=location.hash.slice(1);
+current=null;
+showTab(TABS.includes(h0)?h0:'ipoteka',false);
+})();
+</script>
+</body>
+</html>
